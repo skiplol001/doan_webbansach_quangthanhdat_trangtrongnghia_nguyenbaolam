@@ -4,15 +4,15 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Configuration;
 using System.Web.UI.WebControls;
+using System.Web.UI;
+using System.Web;
 
 namespace lab05
 {
     public partial class danhsach : System.Web.UI.Page
     {
-        // Sử dụng chuỗi kết nối từ Web.config
         string strCon = ConfigurationManager.ConnectionStrings["BookStoreDB"].ConnectionString;
-        int pageSize = 6;
-        protected string TenChuDeHienTai = "";
+        int pageSize = 12;
 
         public int CurrentPage
         {
@@ -27,101 +27,84 @@ namespace lab05
         {
             if (!IsPostBack)
             {
-                LoadTenChuDe();
                 LoadBooks();
             }
         }
 
-        private void LoadTenChuDe()
+        public string RenderTags(object tagsObj)
         {
-            string maCD = Request.QueryString["MaCD"];
-            if (!string.IsNullOrEmpty(maCD))
+            if (tagsObj == null || tagsObj == DBNull.Value || string.IsNullOrEmpty(tagsObj.ToString()))
+                return "";
+
+            string tags = tagsObj.ToString();
+            string[] tagArray = tags.Split(',');
+            string html = "";
+
+            foreach (string tag in tagArray)
             {
-                using (SqlConnection con = new SqlConnection(strCon))
+                if (!string.IsNullOrWhiteSpace(tag))
                 {
-                    string sql = "SELECT Tenchude FROM ChuDe WHERE MaCD = @ID";
-                    SqlCommand cmd = new SqlCommand(sql, con);
-                    cmd.Parameters.AddWithValue("@ID", maCD);
-                    con.Open();
-                    object result = cmd.ExecuteScalar();
-                    if (result != null) TenChuDeHienTai = result.ToString();
+                    html += $"<span class='tag-badge'>{tag.Trim()}</span>";
                 }
             }
+            return html;
         }
 
         private void LoadBooks()
         {
             string maCD = Request.QueryString["MaCD"];
+            string maLoai = Request.QueryString["MaLoai"];
             string search = Request.QueryString["search"];
-            string sort = Request.QueryString["sort"];
             string price = Request.QueryString["price"];
-            string min = Request.QueryString["min"];
-            string max = Request.QueryString["max"];
-
-            // Thiết lập tiêu đề hiển thị
-            if (!string.IsNullOrEmpty(search)) hTitle.InnerText = "KẾT QUẢ: " + search.ToUpper();
-            else if (!string.IsNullOrEmpty(TenChuDeHienTai)) hTitle.InnerText = TenChuDeHienTai.ToUpper();
-            else hTitle.InnerText = "TẤT CẢ SÁCH";
+            string sort = Request.QueryString["sort"];
 
             using (SqlConnection conn = new SqlConnection(strCon))
             {
-                // 1. Xây dựng WHERE clause động
-                string whereClause = " WHERE 1=1";
-                if (!string.IsNullOrEmpty(maCD)) whereClause += " AND MaCD = @MaCD";
-                if (!string.IsNullOrEmpty(search)) whereClause += " AND TenSach LIKE @Search";
+                string where = " WHERE TrangThai = 1";
+                if (!string.IsNullOrEmpty(maCD)) where += " AND MaCD = @MaCD";
+                if (!string.IsNullOrEmpty(maLoai)) where += " AND MaCD IN (SELECT MaCD FROM ChuDe WHERE MaLoai = @MaLoai)";
+                if (!string.IsNullOrEmpty(search)) where += " AND TenSach LIKE @Search";
 
-                if (!string.IsNullOrEmpty(price))
+                // Xử lý logic lọc giá
+                if (price == "under100" || price == "0-100") where += " AND Dongia < 100000";
+                else if (price == "100to500" || price == "100-500") where += " AND Dongia BETWEEN 100000 AND 500000";
+                else if (price == "over500") where += " AND Dongia > 500000";
+
+                string orderBy = "Ngaycapnhat DESC";
+                if (!string.IsNullOrEmpty(sort))
                 {
-                    if (price == "0-50") whereClause += " AND Dongia < 50000";
-                    else if (price == "50-200") whereClause += " AND Dongia BETWEEN 50000 AND 200000";
-                    else if (price == "200-above") whereClause += " AND Dongia > 200000";
-                }
-                else
-                {
-                    if (!string.IsNullOrEmpty(min)) whereClause += " AND Dongia >= @Min";
-                    if (!string.IsNullOrEmpty(max)) whereClause += " AND Dongia <= @Max";
+                    switch (sort.ToLower())
+                    {
+                        case "name_asc": orderBy = "TenSach ASC"; break;
+                        case "price_asc": orderBy = "Dongia ASC"; break;
+                        case "date_desc": orderBy = "Ngaycapnhat DESC"; break;
+                    }
                 }
 
-                // 2. Sắp xếp
-                string orderSql = "TenSach ASC";
-                if (sort == "date_desc") orderSql = "Ngaycapnhat DESC";
-                else if (sort == "price_asc") orderSql = "Dongia ASC";
+                string sqlData = $@"SELECT * FROM Sach {where} ORDER BY {orderBy} OFFSET @Offset ROWS FETCH NEXT @Limit ROWS ONLY";
+                SqlCommand cmd = new SqlCommand(sqlData, conn);
 
-                // 3. Thực thi lấy dữ liệu (OFFSET FETCH yêu cầu SQL 2012+)
-                string sqlData = $@"SELECT * FROM Sach {whereClause} ORDER BY {orderSql} 
-                                   OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
+                if (!string.IsNullOrEmpty(maCD)) cmd.Parameters.AddWithValue("@MaCD", maCD);
+                if (!string.IsNullOrEmpty(maLoai)) cmd.Parameters.AddWithValue("@MaLoai", maLoai);
+                if (!string.IsNullOrEmpty(search)) cmd.Parameters.AddWithValue("@Search", "%" + search + "%");
+                cmd.Parameters.AddWithValue("@Offset", (CurrentPage - 1) * pageSize);
+                cmd.Parameters.AddWithValue("@Limit", pageSize);
 
-                SqlCommand cmdData = new SqlCommand(sqlData, conn);
-
-                // Add Parameters cho cmdData
-                if (!string.IsNullOrEmpty(maCD)) cmdData.Parameters.AddWithValue("@MaCD", maCD);
-                if (!string.IsNullOrEmpty(search)) cmdData.Parameters.AddWithValue("@Search", "%" + search + "%");
-                if (string.IsNullOrEmpty(price))
-                {
-                    if (!string.IsNullOrEmpty(min)) cmdData.Parameters.AddWithValue("@Min", min);
-                    if (!string.IsNullOrEmpty(max)) cmdData.Parameters.AddWithValue("@Max", max);
-                }
-                cmdData.Parameters.AddWithValue("@Offset", (CurrentPage - 1) * pageSize);
-                cmdData.Parameters.AddWithValue("@PageSize", pageSize);
-
-                SqlDataAdapter da = new SqlDataAdapter(cmdData);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
+
                 rptSach.DataSource = dt;
                 rptSach.DataBind();
+                pnlEmpty.Visible = (dt.Rows.Count == 0);
 
-                // 4. Lệnh đếm tổng để phân trang (Dùng SqlCommand riêng để tránh lỗi reuse Parameter)
-                SqlCommand cmdCount = new SqlCommand($"SELECT COUNT(*) FROM Sach {whereClause}", conn);
+                SqlCommand cmdCount = new SqlCommand($"SELECT COUNT(*) FROM Sach {where}", conn);
                 if (!string.IsNullOrEmpty(maCD)) cmdCount.Parameters.AddWithValue("@MaCD", maCD);
+                if (!string.IsNullOrEmpty(maLoai)) cmdCount.Parameters.AddWithValue("@MaLoai", maLoai);
                 if (!string.IsNullOrEmpty(search)) cmdCount.Parameters.AddWithValue("@Search", "%" + search + "%");
-                if (string.IsNullOrEmpty(price))
-                {
-                    if (!string.IsNullOrEmpty(min)) cmdCount.Parameters.AddWithValue("@Min", min);
-                    if (!string.IsNullOrEmpty(max)) cmdCount.Parameters.AddWithValue("@Max", max);
-                }
 
                 conn.Open();
-                int totalRows = (int)cmdCount.ExecuteScalar();
+                int totalRows = Convert.ToInt32(cmdCount.ExecuteScalar());
                 conn.Close();
 
                 int totalPages = (int)Math.Ceiling((double)totalRows / pageSize);
@@ -129,97 +112,102 @@ namespace lab05
             }
         }
 
+        private void BindPagination(int totalPages)
+        {
+            if (totalPages <= 1) { lnkFirst.Visible = lnkLast.Visible = rptPagination.Visible = false; return; }
+            lnkFirst.Visible = lnkLast.Visible = rptPagination.Visible = true;
+            lnkFirst.NavigateUrl = GetPageUrl(1);
+            lnkLast.NavigateUrl = GetPageUrl(totalPages);
+            List<int> pages = new List<int>();
+            for (int i = 1; i <= totalPages; i++) pages.Add(i);
+            rptPagination.DataSource = pages;
+            rptPagination.DataBind();
+        }
 
+        protected string GetPageUrl(object pageNum)
+        {
+            var myMaster = Master as lab05.Default;
+            if (myMaster != null) return myMaster.GetMasterFilterUrl("page", pageNum.ToString());
+            return "danhsach.aspx?page=" + pageNum;
+        }
 
         protected void rptSach_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
             if (e.CommandName == "ThemGioHang")
             {
-                int maSach = Convert.ToInt32(e.CommandArgument);
-                ThemSachVaoSession(maSach);
+                // ==========================================
+                // KIỂM TRA ĐĂNG NHẬP TRƯỚC KHI THÊM HÀNG
+                // ==========================================
+                if (Session["MaKH"] == null && Session["HoTen"] == null)
+                {
+                    // Chuyển hướng sang trang đăng nhập trong folder khach
+                    Response.Redirect("~/khach/dangnhap.aspx");
+                    return; // Dừng mọi xử lý thêm vào giỏ hàng
+                }
 
-               
+                // Nếu đã đăng nhập thì tiếp tục logic
+                int maSach = Convert.ToInt32(e.CommandArgument);
+                ThemVaoGio(maSach);
+
+                var myMaster = Master as lab05.Default;
+                if (myMaster != null)
+                {
+                    myMaster.UpdateCartCountAjax();
+                }
+
+                // Hiển thị thông báo Toast phía Client
+                ScriptManager.RegisterStartupScript(this, GetType(), "Toast", "showToast();", true);
             }
         }
 
-        private void ThemSachVaoSession(int maSach)
+        private void ThemVaoGio(int maSach)
         {
-            DataTable dtCart;
-            if (Session["Cart"] == null)
+            DataTable dt = (Session["Cart"] == null) ? CreateCartTable() : (DataTable)Session["Cart"];
+            bool found = false;
+            foreach (DataRow r in dt.Rows)
             {
-                dtCart = new DataTable();
-                dtCart.Columns.Add("MaSach", typeof(int));
-                dtCart.Columns.Add("TenSach", typeof(string));
-                dtCart.Columns.Add("HinhAnh", typeof(string));
-                dtCart.Columns.Add("Dongia", typeof(decimal));
-                dtCart.Columns.Add("Soluong", typeof(int));
-                dtCart.Columns.Add("Thanhtien", typeof(decimal));
-            }
-            else { dtCart = (DataTable)Session["Cart"]; }
-
-            bool exists = false;
-            foreach (DataRow row in dtCart.Rows)
-            {
-                if (Convert.ToInt32(row["MaSach"]) == maSach)
+                if (Convert.ToInt32(r["MaSach"]) == maSach)
                 {
-                    row["Soluong"] = (int)row["Soluong"] + 1;
-                    row["Thanhtien"] = (int)row["Soluong"] * (decimal)row["Dongia"];
-                    exists = true; break;
+                    r["Soluong"] = Convert.ToInt32(r["Soluong"]) + 1;
+                    r["Thanhtien"] = Convert.ToInt32(r["Soluong"]) * Convert.ToDecimal(r["Dongia"]);
+                    found = true; break;
                 }
             }
-
-            if (!exists)
+            if (!found)
             {
-                using (SqlConnection conn = new SqlConnection(strCon))
+                using (SqlConnection con = new SqlConnection(strCon))
                 {
-                    SqlCommand cmd = new SqlCommand("SELECT MaSach, TenSach, AnhBia, Dongia FROM Sach WHERE MaSach=@ID", conn);
+                    string sql = "SELECT MaSach, TenSach, AnhBia, Dongia FROM Sach WHERE MaSach=@ID";
+                    SqlCommand cmd = new SqlCommand(sql, con);
                     cmd.Parameters.AddWithValue("@ID", maSach);
-                    conn.Open();
-                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    con.Open();
+                    SqlDataReader dr = cmd.ExecuteReader();
+                    if (dr.Read())
                     {
-                        if (dr.Read())
-                        {
-                            DataRow nr = dtCart.NewRow();
-                            nr["MaSach"] = dr["MaSach"];
-                            nr["TenSach"] = dr["TenSach"];
-                            nr["HinhAnh"] = dr["AnhBia"];
-                            nr["Dongia"] = dr["Dongia"];
-                            nr["Soluong"] = 1;
-                            nr["Thanhtien"] = dr["Dongia"];
-                            dtCart.Rows.Add(nr);
-                        }
+                        DataRow nr = dt.NewRow();
+                        nr["MaSach"] = dr["MaSach"];
+                        nr["TenSach"] = dr["TenSach"];
+                        nr["HinhAnh"] = dr["AnhBia"];
+                        nr["Dongia"] = dr["Dongia"];
+                        nr["Soluong"] = 1;
+                        nr["Thanhtien"] = dr["Dongia"];
+                        dt.Rows.Add(nr);
                     }
                 }
             }
-            Session["Cart"] = dtCart;
+            Session["Cart"] = dt;
         }
 
-        private void BindPagination(int totalPages)
+        private DataTable CreateCartTable()
         {
-            if (totalPages <= 0) totalPages = 1;
-            List<int> pages = new List<int>();
-            for (int i = 1; i <= totalPages; i++) pages.Add(i);
-            rptPagination.DataSource = pages;
-            rptPagination.DataBind();
-
-            lnkPrev.NavigateUrl = GetPageUrl(CurrentPage - 1);
-            lnkPrev.CssClass = (CurrentPage <= 1) ? "page-node disabled" : "page-node";
-            lnkNext.NavigateUrl = GetPageUrl(CurrentPage + 1);
-            lnkNext.CssClass = (CurrentPage >= totalPages) ? "page-node disabled" : "page-node";
-        }
-
-        protected string GetPageUrl(object pageNum)
-        {
-            string url = Request.Path + "?";
-            if (Request.QueryString.AllKeys.Length > 0)
-            {
-                foreach (string key in Request.QueryString.AllKeys)
-                {
-                    if (key != null && key != "page")
-                        url += key + "=" + Server.UrlEncode(Request.QueryString[key]) + "&";
-                }
-            }
-            return url + "page=" + pageNum;
+            DataTable dt = new DataTable();
+            dt.Columns.Add("MaSach", typeof(int));
+            dt.Columns.Add("TenSach", typeof(string));
+            dt.Columns.Add("HinhAnh", typeof(string));
+            dt.Columns.Add("Dongia", typeof(decimal));
+            dt.Columns.Add("Soluong", typeof(int));
+            dt.Columns.Add("Thanhtien", typeof(decimal));
+            return dt;
         }
     }
 }

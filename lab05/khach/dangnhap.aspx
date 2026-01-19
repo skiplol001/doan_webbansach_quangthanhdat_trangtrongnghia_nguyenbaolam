@@ -20,6 +20,7 @@
         .register-link a { color: #ff4081; text-decoration: none; font-weight: 700; }
         .register-link a:hover { text-decoration: underline; }
         .validator-style { font-size: 0.75rem; color: #ef4444; margin-top: 4px; display: block; }
+          body { cursor: url('https://cur.cursors-4u.net/games/gam-4/gam372.cur'), auto !important; }
     </style>
 </asp:Content>
 

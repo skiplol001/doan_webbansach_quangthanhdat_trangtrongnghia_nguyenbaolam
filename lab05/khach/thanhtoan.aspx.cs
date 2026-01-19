@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Configuration;
+using System.Web.UI;
+using System.Web.UI.WebControls;
 
 namespace lab05
 {
@@ -17,8 +20,16 @@ namespace lab05
                 return;
             }
 
+            if (Session["MaKH"] == null)
+            {
+                Response.Redirect("~/khach/dangnhap.aspx");
+                return;
+            }
+
             if (!IsPostBack)
             {
+                DateTime ngayGiaoDuKien = DateTime.Now.AddDays(14);
+                litNgayGiaoShow.Text = ngayGiaoDuKien.ToString("dd/MM/yyyy");
                 LoadOrderSummary();
             }
         }
@@ -30,7 +41,9 @@ namespace lab05
             rptSummary.DataBind();
 
             decimal total = 0;
-            foreach (DataRow r in dt.Rows) total += Convert.ToDecimal(r["Thanhtien"]);
+            foreach (DataRow r in dt.Rows)
+                total += Convert.ToDecimal(r["Thanhtien"]);
+
             lblTongTien.Text = string.Format("{0:#,##0} VNĐ", total);
         }
 
@@ -38,32 +51,36 @@ namespace lab05
         {
             DataTable dtCart = (DataTable)Session["Cart"];
             decimal tongTien = 0;
-            foreach (DataRow r in dtCart.Rows) tongTien += Convert.ToDecimal(r["Thanhtien"]);
+            foreach (DataRow r in dtCart.Rows)
+                tongTien += Convert.ToDecimal(r["Thanhtien"]);
+
+            DateTime ngayGiaoThucTe = DateTime.Now.AddDays(14);
 
             using (SqlConnection conn = new SqlConnection(strCon))
             {
                 conn.Open();
-                SqlTransaction trans = conn.BeginTransaction(); // Bắt đầu giao dịch
+                SqlTransaction trans = conn.BeginTransaction();
 
                 try
                 {
-                    // 1. Thêm vào bảng DonDatHang
+                    // 1. Lưu DonDatHang
                     string sqlDonHang = @"INSERT INTO DonDatHang (MaKH, NgayDH, Trigia, Dagiao, Ngaygiao) 
                                          VALUES (@MaKH, GETDATE(), @Trigia, 0, @NgayGiao);
-                                         SELECT SCOPE_IDENTITY();"; // Lấy mã SoDH vừa tạo tự động
+                                         SELECT SCOPE_IDENTITY();";
 
                     SqlCommand cmdDH = new SqlCommand(sqlDonHang, conn, trans);
-                    cmdDH.Parameters.AddWithValue("@MaKH", 2); // Giả định MaKH = 2 như các bài trước
+                    cmdDH.Parameters.AddWithValue("@MaKH", Session["MaKH"]);
                     cmdDH.Parameters.AddWithValue("@Trigia", tongTien);
-                    cmdDH.Parameters.AddWithValue("@NgayGiao", string.IsNullOrEmpty(txtNgayGiao.Text) ? (object)DBNull.Value : txtNgayGiao.Text);
+                    cmdDH.Parameters.AddWithValue("@NgayGiao", ngayGiaoThucTe);
 
                     int soDH = Convert.ToInt32(cmdDH.ExecuteScalar());
 
-                    // 2. Thêm danh sách sách vào bảng CTDatHang
+                    // 2. Lưu CTDatHang
                     foreach (DataRow row in dtCart.Rows)
                     {
                         string sqlCT = @"INSERT INTO CTDatHang (SoDH, MaSach, Soluong, Dongia, Thanhtien) 
                                         VALUES (@SoDH, @MaSach, @Soluong, @Dongia, @Thanhtien)";
+
                         SqlCommand cmdCT = new SqlCommand(sqlCT, conn, trans);
                         cmdCT.Parameters.AddWithValue("@SoDH", soDH);
                         cmdCT.Parameters.AddWithValue("@MaSach", row["MaSach"]);
@@ -73,16 +90,18 @@ namespace lab05
                         cmdCT.ExecuteNonQuery();
                     }
 
-                    trans.Commit(); // Thành công hết thì xác nhận lưu vào DB
-
-                    // 3. Xóa giỏ hàng và thông báo
+                    trans.Commit();
                     Session["Cart"] = null;
-                    Response.Write("<script>alert('Chúc mừng! Đơn hàng của bạn đã được đặt thành công.'); window.location='/khach/trangchu.aspx';</script>");
+
+                    // --- CẬP NHẬT: ĐÓNG MODAL VÀ HIỆN TOAST TRƯỚC KHI CHUYỂN TRANG ---
+                    string successMsg = "Đặt hàng thành công! Mã đơn của bạn là #" + soDH;
+                    string script = "closeConfirmModal(); showToast('" + successMsg + "'); setTimeout(function(){ window.location='/khach/trangchu.aspx'; }, 2500);";
+                    ScriptManager.RegisterStartupScript(this, GetType(), "OrderSuccess", script, true);
                 }
                 catch (Exception ex)
                 {
-                    trans.Rollback(); // Nếu có lỗi thì hủy bỏ toàn bộ dữ liệu đã insert ở trên
-                    Response.Write("<script>alert('Lỗi hệ thống: " + ex.Message + "');</script>");
+                    trans.Rollback();
+                    ScriptManager.RegisterStartupScript(this, GetType(), "OrderErr", "closeConfirmModal(); alert('Lỗi hệ thống: " + ex.Message + "');", true);
                 }
             }
         }

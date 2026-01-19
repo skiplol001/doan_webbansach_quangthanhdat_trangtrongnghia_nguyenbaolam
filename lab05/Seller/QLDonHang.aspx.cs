@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Configuration; 
-using System.Linq;
-using System.Web;
+using System.Configuration;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace lab05.Seller
+namespace lab05.Admin
 {
     public partial class QLDonHang : System.Web.UI.Page
     {
@@ -16,74 +13,95 @@ namespace lab05.Seller
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            // 2. Kiểm tra bảo mật: Nếu chưa đăng nhập hoặc không phải là người bán (Role 2)
-            if (Session["MaRole"] == null || Convert.ToInt32(Session["MaRole"]) != 2)
-            {
-                // Đẩy về trang đăng nhập nếu truy cập trái phép
-                Response.Redirect("~/khach/dangnhap.aspx");
-            }
-
-            // 3. Chỉ load dữ liệu ở lần đầu tiên (tránh load lại khi bấm nút)
             if (!IsPostBack)
             {
-                LoadDonHang();
+                LoadOrders();
             }
         }
 
-        protected void LoadDonHang()
+        private void LoadOrders()
         {
-            try
+            using (SqlConnection con = new SqlConnection(strCon))
             {
-                using (SqlConnection conn = new SqlConnection(strCon))
-                {
-                    // Truy vấn kết hợp bảng Khách hàng để lấy tên người mua
-                    string sql = @"SELECT d.SoDH, d.NgayDH, d.Trigia, d.Dagiao, k.HoTenKH 
-                                 FROM DonDatHang d 
-                                 JOIN KhachHang k ON d.MaKH = k.MaKH 
-                                 ORDER BY d.NgayDH DESC";
+                string sql = @"SELECT D.SoDH, K.HoTenKH, K.Dienthoai, D.NgayDH, D.Trigia, D.Dagiao, D.Ngaygiao 
+                             FROM DonDatHang D 
+                             INNER JOIN KhachHang K ON D.MaKH = K.MaKH 
+                             ORDER BY D.Dagiao ASC, D.NgayDH DESC";
 
-                    SqlDataAdapter da = new SqlDataAdapter(sql, conn);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-
-                    gvDonHang.DataSource = dt;
-                    gvDonHang.DataBind();
-                }
-            }
-            catch (Exception ex)
-            {
-                // Có thể thêm nhãn thông báo lỗi trên giao diện nếu cần
-                Response.Write("<script>alert('Lỗi khi tải đơn hàng: " + ex.Message + "');</script>");
-            }
-        }
-
-        protected void gvDonHang_RowCommand(object sender, GridViewCommandEventArgs e)
-        {
-            // 4. Xử lý nút "Đổi trạng thái" (UpdateStatus)
-            if (e.CommandName == "UpdateStatus")
-            {
-                int soDH = Convert.ToInt32(e.CommandArgument);
+                SqlDataAdapter da = new SqlDataAdapter(sql, con);
+                DataTable dt = new DataTable();
                 try
                 {
-                    using (SqlConnection conn = new SqlConnection(strCon))
-                    {
-                        // Cập nhật trạng thái thành Đã giao (Dagiao = 1) và set ngày giao là hiện tại
-                        string sql = "UPDATE DonDatHang SET Dagiao = 1, Ngaygiao = GETDATE() WHERE SoDH = @id";
-                        SqlCommand cmd = new SqlCommand(sql, conn);
-                        cmd.Parameters.AddWithValue("@id", soDH);
-
-                        conn.Open();
-                        cmd.ExecuteNonQuery();
-                        conn.Close();
-                    }
-
-                    // 5. Thông báo thành công và tải lại danh sách
-                    LoadDonHang();
+                    da.Fill(dt);
+                    gvOrders.DataSource = dt;
+                    gvOrders.DataBind();
                 }
                 catch (Exception ex)
                 {
-                    Response.Write("<script>alert('Lỗi khi cập nhật trạng thái: " + ex.Message + "');</script>");
+                    System.Diagnostics.Debug.WriteLine("Lỗi Load SQL: " + ex.Message);
                 }
+            }
+        }
+
+        protected void gvOrders_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (e.CommandName == "HoanDon")
+            {
+                int rowIndex = Convert.ToInt32(e.CommandArgument);
+                int soDH = Convert.ToInt32(gvOrders.DataKeys[rowIndex].Value);
+
+                GridViewRow row = gvOrders.Rows[rowIndex];
+                TextBox txtDate = (TextBox)row.FindControl("txtNewDate");
+
+                if (txtDate != null && !string.IsNullOrEmpty(txtDate.Text))
+                {
+                    DateTime ngayMoi = DateTime.Parse(txtDate.Text);
+
+                    if (ngayMoi < DateTime.Today)
+                    {
+                        ScriptManager.RegisterStartupScript(this, GetType(), "err", "showToast('Lỗi: Ngày hoãn không hợp lệ!');", true);
+                        return;
+                    }
+
+                    UpdateOrder(soDH, ngayMoi, 0);
+                    LoadOrders();
+                    ScriptManager.RegisterStartupScript(this, GetType(), "ok", "showToast('Đã cập nhật lịch trình mới cho đơn #" + soDH + "');", true);
+                }
+                else
+                {
+                    ScriptManager.RegisterStartupScript(this, GetType(), "warn", "showToast('Vui lòng chọn ngày trước khi xác nhận!');", true);
+                }
+            }
+        }
+
+        // --- XỬ LÝ CHỐT ĐƠN TỪ MODAL XÁC NHẬN ---
+        protected void btnFinalDone_Click(object sender, EventArgs e)
+        {
+            string idRaw = hfSelectedOrder.Value;
+            if (!string.IsNullOrEmpty(idRaw))
+            {
+                int soDH = Convert.ToInt32(idRaw);
+                UpdateOrder(soDH, DateTime.Now, 1);
+                LoadOrders();
+
+                // Đóng modal và hiện Toast thành công
+                string script = "closeConfirmModal(); showToast('Đơn hàng #" + soDH + " đã được chốt thành công!');";
+                ScriptManager.RegisterStartupScript(this, GetType(), "done", script, true);
+            }
+        }
+
+        private void UpdateOrder(int id, DateTime date, int status)
+        {
+            using (SqlConnection con = new SqlConnection(strCon))
+            {
+                string sql = "UPDATE DonDatHang SET Ngaygiao = @Ngay, Dagiao = @Status WHERE SoDH = @ID";
+                SqlCommand cmd = new SqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("@Ngay", date);
+                cmd.Parameters.AddWithValue("@Status", status);
+                cmd.Parameters.AddWithValue("@ID", id);
+                con.Open();
+                cmd.ExecuteNonQuery();
+                con.Close();
             }
         }
     }

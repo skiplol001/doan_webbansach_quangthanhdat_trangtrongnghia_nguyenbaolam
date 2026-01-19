@@ -15,6 +15,24 @@ namespace lab05
     {
 
         /// <summary>
+        /// btnConfirmDelete control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnConfirmDelete;
+
+        /// <summary>
+        /// hfDeleteID control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfDeleteID;
+
+        /// <summary>
         /// FormViewChiTiet control.
         /// </summary>
         /// <remarks>
@@ -22,24 +40,6 @@ namespace lab05
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.FormView FormViewChiTiet;
-
-        /// <summary>
-        /// rptSachCungChuDe control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptSachCungChuDe;
-
-        /// <summary>
-        /// pnlNoRelated control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlNoRelated;
 
         /// <summary>
         /// pnlCommentForm control.
@@ -78,15 +78,6 @@ namespace lab05
         protected global::System.Web.UI.WebControls.Button btnGuiBL;
 
         /// <summary>
-        /// lblMsg control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblMsg;
-
-        /// <summary>
         /// pnlLoginReq control.
         /// </summary>
         /// <remarks>
@@ -94,6 +85,15 @@ namespace lab05
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel pnlLoginReq;
+
+        /// <summary>
+        /// upComments control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.UpdatePanel upComments;
 
         /// <summary>
         /// rptComments control.
@@ -112,15 +112,6 @@ namespace lab05
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.SqlDataSource SqlDataSourceChiTiet;
-
-        /// <summary>
-        /// SqlDataSourceSachCungChuDe control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.SqlDataSource SqlDataSourceSachCungChuDe;
 
         /// <summary>
         /// SqlDataSourceComments control.

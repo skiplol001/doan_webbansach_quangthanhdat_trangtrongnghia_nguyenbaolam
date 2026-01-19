@@ -2,92 +2,168 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <style>
-        .page-title { color: var(--text-main); font-size: 28px; font-weight: 800; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 1px; position: relative; padding-bottom: 15px; }
-        .page-title::after { content: ''; position: absolute; bottom: 0; left: 0; width: 60px; height: 4px; background: var(--primary-color); border-radius: 2px; }
-
-        .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; margin-top: 20px; }
-
-        .book-item { background: #fff; border-radius: 16px; padding: 20px; text-align: center; border: 1px solid #f1f5f9; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; position: relative; }
-        .book-item:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: var(--primary-light); }
-
-        .image-wrapper { height: 200px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; background-color: #f8fafc; border-radius: 12px; padding: 10px; }
-        .book-image { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.5s ease; }
-        .book-item:hover .book-image { transform: scale(1.05); }
-
-        .book-name { font-weight: 700; color: var(--text-main); font-size: 0.95rem; margin-bottom: 10px; height: 42px; line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-        .book-price { color: var(--primary-color); font-weight: 800; font-size: 1.1rem; margin-bottom: 15px; }
-
-        .button-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: auto; }
-        .btn-ui { padding: 10px 5px; border-radius: 10px; font-weight: 700; font-size: 0.75rem; text-decoration: none; cursor: pointer; border: none; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        /* --- TỔNG THỂ --- */
+        .sach-container { padding-bottom: 80px; max-width: 1400px; margin: 0 auto; }
         
-        .btn-add-cart { background: var(--primary-color); color: white; }
-        .btn-add-cart:hover { background: var(--primary-dark); transform: scale(1.02); }
-        .btn-detail { background: #f1f5f9; color: var(--text-main); }
-        .btn-detail:hover { background: #2196F3; color: white !important; }
+        .page-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin: 40px 0 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px;
+        }
 
-        /* Phân trang */
-        .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 50px; }
-        .page-node { text-decoration: none; padding: 10px 16px; border-radius: 10px; background: #fff; color: var(--text-main); border: 1px solid #e2e8f0; font-size: 0.9rem; font-weight: 600; transition: all 0.2s; }
-        .page-node:hover { border-color: var(--primary-color); color: var(--primary-color); background: #fff0f6; }
-        .page-node.active { background: var(--primary-color); color: white; border-color: var(--primary-color); box-shadow: 0 4px 10px rgba(255, 64, 129, 0.3); }
-        .page-node.disabled { opacity: 0.5; pointer-events: none; background: #f8fafc; }
+        .page-title { color: var(--text); font-size: 2.2rem; font-weight: 800; margin: 0; text-transform: uppercase; }
+        .page-title span { color: var(--primary); }
 
-        /* Toast thông báo */
-        .message { position: fixed; top: 100px; right: 25px; padding: 15px 25px; border-radius: 12px; color: white; font-weight: 600; z-index: 9999; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.1); background-color: #10b981; animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        /* --- GRID HỆ THỐNG --- */
+        .books-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 30px; 
+            margin-bottom: 50px; 
+        }
+
+        /* --- CARD SÁCH PREMIUM --- */
+        .book-card { 
+            background: #fff; border-radius: 24px; padding: 20px; 
+            border: 1px solid rgba(0,0,0,0.04); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            display: flex; flex-direction: column; cursor: pointer; position: relative;
+            height: 100%;
+        }
+        .book-card:hover { 
+            transform: translateY(-12px); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08); 
+            border-color: var(--primary-light); 
+        }
+
+        /* --- IMAGE & TAGS OVERLAY --- */
+        .img-wrapper { 
+            height: 280px; display: flex; align-items: center; justify-content: center; 
+            background: #f8fafc; border-radius: 20px; margin-bottom: 20px; 
+            overflow: hidden; position: relative;
+        }
+        .img-wrapper img { 
+            max-width: 85%; max-height: 85%; object-fit: contain; 
+            transition: 0.5s ease;
+        }
+        .book-card:hover .img-wrapper img { transform: scale(1.1); }
+
+        .tags-overlay {
+            position: absolute; top: 15px; left: 15px;
+            display: flex; flex-wrap: wrap; gap: 6px; z-index: 10;
+            max-width: 85%;
+        }
+        .tag-badge {
+            background: rgba(255, 255, 255, 0.95); color: var(--primary);
+            padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800;
+            text-transform: uppercase; border-left: 3px solid var(--primary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            pointer-events: none;
+        }
+
+        /* --- INFO --- */
+        .book-name { 
+            font-weight: 700; color: var(--text); font-size: 1.1rem;
+            height: 3rem; overflow: hidden; display: -webkit-box; 
+            -webkit-line-clamp: 2; -webkit-box-orient: vertical; 
+            margin-bottom: 12px; line-height: 1.5; 
+        }
+        .book-price { color: var(--primary); font-weight: 800; font-size: 1.4rem; margin-bottom: 15px; }
+
+        /* --- ACTIONS --- */
+        .btn-buy { 
+            background: var(--primary); color: #fff !important; height: 50px; border-radius: 15px; 
+            display: flex; align-items: center; justify-content: center; text-decoration: none; 
+            font-weight: 700; border: none; cursor: pointer; width: 100%; transition: 0.3s;
+            margin-top: auto;
+        }
+        .btn-buy:hover { background: #333; transform: scale(1.02); }
+
+        /* --- PHÂN TRANG --- */
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 60px; }
+        .page-node { 
+            text-decoration: none; min-width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; 
+            border-radius: 12px; background: #fff; color: #64748b; border: 1px solid #e2e8f0; font-weight: 700; transition: 0.3s; 
+        }
+        .page-node:hover:not(.disabled) { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+        .page-node.active { background: var(--primary); color: #fff !important; border-color: var(--primary); box-shadow: 0 8px 15px rgba(255, 64, 129, 0.2); }
+        .page-node.disabled { opacity: 0.5; cursor: not-allowed; background: #f8fafc; }
+        .page-nav { padding: 0 20px; font-size: 0.8rem; text-transform: uppercase; }
+
+        /* Toast Message */
+        #toastBox {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: #1e293b; color: #fff; padding: 15px 35px; border-radius: 50px;
+            z-index: 9999; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
     </style>
 
     <script>
-        function showAddingMessage(bookName) {
-            var msgBox = document.getElementById("messageBox");
-            msgBox.innerHTML = "<i class='fa-solid fa-check-circle'></i> Đã thêm <b>" + bookName + "</b> vào giỏ!";
-            msgBox.style.display = "block";
-            setTimeout(function () { msgBox.style.display = "none"; }, 2500);
+        function showToast() {
+            var toast = document.getElementById("toastBox");
+            toast.style.display = "block";
+            toast.innerHTML = "<i class='fa-solid fa-cart-plus' style='color:#4ade80;'></i> Đã thêm vào giỏ hàng thành công!";
+            setTimeout(function () { toast.style.display = "none"; }, 3000);
         }
     </script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
-    <div id="messageBox" class="message"></div>
-    
-    <div class="sach-container">
-        <h2 id="hTitle" runat="server" class="page-title">DANH MỤC SÁCH</h2>
+    <div id="toastBox"></div>
 
-        <div class="books-grid">
-            <asp:Repeater ID="rptSach" runat="server" OnItemCommand="rptSach_ItemCommand">
-                <ItemTemplate>
-                    <div class="book-item">
-                        <div class="image-wrapper">
-                            <img src='<%# "../Images/" + (Eval("AnhBia") != DBNull.Value ? Eval("AnhBia") : "no-image.jpg") %>' class="book-image" />
-                        </div>
-                        <div class="book-info">
-                            <div class="book-name" title='<%# Eval("TenSach") %>'><%# Eval("TenSach") %></div>
-                            <div class="book-price"><%# string.Format("{0:#,##0} đ", Eval("Dongia")) %></div>
-                        </div>
-                        <div class="button-container">
-                            <asp:LinkButton ID="btnThem" runat="server" CommandName="ThemGioHang" CommandArgument='<%# Eval("MaSach") %>'
-                                CssClass="btn-ui btn-add-cart" OnClientClick='<%# "showAddingMessage(\"" + Eval("TenSach").ToString().Replace("\"", "\\\"") + "\");" %>'>
-                                <i class="fa-solid fa-cart-plus"></i> Thêm
-                            </asp:LinkButton>
-                            <a href='<%# "chitiet.aspx?MaSach=" + Eval("MaSach") %>' class="btn-ui btn-detail">Chi tiết</a>
-                        </div>
-                    </div>
-                </ItemTemplate>
-            </asp:Repeater>
+    <div class="sach-container">
+        <div class="page-header">
+            <h2 id="hTitle" runat="server" class="page-title">DANH MỤC <span>SÁCH</span></h2>
         </div>
 
+        <asp:Panel ID="pnlEmpty" runat="server" Visible="false" Style="text-align: center; padding: 120px 0;">
+            <i class="fa-solid fa-box-open" style="font-size: 60px; color: #dee2e6; margin-bottom: 20px;"></i>
+            <h4 style="color: #adb5bd;">Rất tiếc, chúng tôi không tìm thấy sách bạn cần.</h4>
+            <a href="danhsach.aspx" class="btn btn-outline-primary mt-3">Xem tất cả sách</a>
+        </asp:Panel>
+
+        <asp:UpdatePanel ID="upList" runat="server">
+            <ContentTemplate>
+                <div class="books-grid">
+                    <asp:Repeater ID="rptSach" runat="server" OnItemCommand="rptSach_ItemCommand">
+                        <ItemTemplate>
+                            <div class="book-card" onclick="window.location.href='chitiet.aspx?MaSach=<%# Eval("MaSach") %>'">
+                                <div class="img-wrapper">
+                                    <div class="tags-overlay">
+                                        <%# RenderTags(Eval("Tags")) %>
+                                    </div>
+                                    <img src='<%# ResolveUrl("~/Images/") + (Eval("AnhBia") != DBNull.Value ? Eval("AnhBia") : "no-image.jpg") %>' alt='<%# Eval("TenSach") %>' />
+                                </div>
+                                
+                                <div class="book-info">
+                                    <div class="book-name" title='<%# Eval("TenSach") %>'><%# Eval("TenSach") %></div>
+                                    <div class="book-price"><%# string.Format("{0:#,##0} đ", Eval("Dongia")) %></div>
+                                </div>
+                                
+                                <asp:LinkButton ID="btnThem" runat="server" CommandName="ThemGioHang" 
+                                    CommandArgument='<%# Eval("MaSach") %>' CssClass="btn-buy" 
+                                    OnClientClick="event.stopPropagation();">
+                                    <i class="fa-solid fa-bag-shopping" style="margin-right:10px;"></i> MUA NGAY
+                                </asp:LinkButton>
+                            </div>
+                        </ItemTemplate>
+                    </asp:Repeater>
+                </div>
+            </ContentTemplate>
+        </asp:UpdatePanel>
+
         <div class="pagination">
-            <asp:HyperLink ID="lnkPrev" runat="server" CssClass="page-node">Trước</asp:HyperLink>
+            <asp:HyperLink ID="lnkFirst" runat="server" CssClass="page-node page-nav">Đầu</asp:HyperLink>
+            
             <asp:Repeater ID="rptPagination" runat="server">
                 <ItemTemplate>
-                    <asp:HyperLink ID="lnkPageNum" runat="server" 
-                        Text='<%# Container.DataItem %>' 
+                    <asp:HyperLink ID="lnkPageNum" runat="server"
+                        Text='<%# Container.DataItem %>'
                         NavigateUrl='<%# GetPageUrl(Container.DataItem) %>'
                         CssClass='<%# Convert.ToInt32(Container.DataItem) == CurrentPage ? "page-node active" : "page-node" %>'>
                     </asp:HyperLink>
                 </ItemTemplate>
             </asp:Repeater>
-            <asp:HyperLink ID="lnkNext" runat="server" CssClass="page-node">Sau</asp:HyperLink>
+            
+            <asp:HyperLink ID="lnkLast" runat="server" CssClass="page-node page-nav">Cuối</asp:HyperLink>
         </div>
     </div>
 </asp:Content>

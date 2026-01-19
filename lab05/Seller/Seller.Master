@@ -1,51 +1,166 @@
-﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="~/Seller/Seller.master.cs" Inherits="lab05.Admin.Seller" %>
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Seller.master.cs" Inherits="lab05.Admin.Seller" %>
+
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seller Panel - BookStore</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+
     <style>
-        :root { --seller-primary: #6366f1; --seller-bg: #f8fafc; --sidebar-width: 260px; }
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--seller-bg); display: flex; }
-        
-        /* Sidebar */
-        .sidebar { width: var(--sidebar-width); background: #1e293b; color: white; height: 100vh; position: fixed; }
-        .sidebar-header { padding: 30px 20px; font-size: 20px; font-weight: 800; text-align: center; border-bottom: 1px solid #334155; }
-        .nav-menu { padding: 20px 0; }
-        .nav-item { padding: 15px 25px; display: flex; align-items: center; gap: 12px; color: #cbd5e1; text-decoration: none; transition: 0.3s; }
-        .nav-item:hover, .nav-item.active { background: #334155; color: white; border-left: 4px solid var(--seller-primary); }
-        
-        /* Main Content */
-        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); min-height: 100vh; }
-        .top-bar { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .content-padding { padding: 30px; }
-        
-        .user-info { font-weight: 600; color: #334155; }
-        .btn-logout { color: #ef4444; text-decoration: none; font-size: 14px; }
+        :root {
+            --seller-primary: #6366f1; /* Indigo Color */
+            --seller-primary-dark: #4f46e5;
+            --seller-bg: #f8fafc;
+            --sidebar-bg: #0f172a;
+            --sidebar-width: 280px;
+            --topbar-h: 70px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--seller-bg); display: flex; overflow-x: hidden; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { 
+            width: var(--sidebar-width); background: var(--sidebar-bg); color: white; 
+            height: 100vh; position: fixed; left: 0; top: 0; z-index: 1000;
+            display: flex; flex-direction: column; box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header { 
+            padding: 35px 25px; font-size: 20px; font-weight: 800; text-align: center; 
+            border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--seller-primary);
+            letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+
+        .nav-menu { padding: 25px 0; flex-grow: 1; overflow-y: auto; }
+
+        .nav-item { 
+            padding: 14px 28px; display: flex; align-items: center; gap: 15px; 
+            color: #94a3b8; text-decoration: none; transition: var(--transition); 
+            font-size: 0.95rem; font-weight: 500; margin: 4px 15px; border-radius: 12px;
+        }
+
+        .nav-item i { width: 20px; font-size: 1.1rem; text-align: center; }
+        .nav-item:hover { background: rgba(99, 102, 241, 0.1); color: white; }
+        .nav-item.active-link { 
+            background: var(--seller-primary); color: white; 
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+        }
+
+        .nav-divider { height: 1px; background: rgba(255,255,255,0.05); margin: 15px 25px; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { 
+            margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); 
+            min-height: 100vh; display: flex; flex-direction: column;
+        }
+
+        .top-bar { 
+            background: white; height: var(--topbar-h); padding: 0 40px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 999;
+        }
+
+        .user-info { font-weight: 700; color: #334155; display: flex; align-items: center; gap: 12px; font-size: 0.95rem; }
+        .user-avatar { 
+            width: 38px; height: 38px; background: #e0e7ff; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; color: var(--seller-primary);
+            border: 2px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .btn-logout { 
+            color: #ef4444; text-decoration: none; font-size: 14px; font-weight: 700;
+            display: flex; align-items: center; gap: 8px; padding: 10px 18px;
+            border-radius: 10px; transition: 0.2s; border: 1px solid #fee2e2;
+            background: #fff; cursor: pointer;
+        }
+        .btn-logout:hover { background: #fee2e2; transform: translateY(-2px); }
+
+        .content-padding { padding: 40px; flex-grow: 1; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
     <asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>
 </head>
 <body>
     <form id="form1" runat="server">
+        <%-- FIX: ScriptManager bắt buộc phải có để trang con không bị lỗi AJAX --%>
+        <asp:ScriptManager ID="smSeller" runat="server" />
+
         <div class="sidebar">
-            <div class="sidebar-header">SELLER PANEL</div>
+            <div class="sidebar-header">
+                <i class="fa-solid fa-store"></i> SELLER CENTER
+            </div>
+            
             <div class="nav-menu">
-                <a href="Dashboard.aspx" class="nav-item active"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
-                <a href="QLSach.aspx" class="nav-item"><i class="fa-solid fa-book"></i> Quản lý Sách</a>
-                <a href="QLDonHang.aspx" class="nav-item"><i class="fa-solid fa-cart-shopping"></i> Đơn hàng</a>
-                <a href="../khach/trangchu.aspx" class="nav-item"><i class="fa-solid fa-house"></i> Xem trang khách</a>
+                <a href="Dashboard.aspx" class="nav-item">
+                    <i class="fa-solid fa-chart-pie"></i> Tổng quan
+                </a>
+                
+                <a href="QLSach.aspx" class="nav-item">
+                    <i class="fa-solid fa-book-open"></i> Quản lý Sách
+                </a>
+                
+                <a href="QLDonHang.aspx" class="nav-item">
+                    <i class="fa-solid fa-truck-fast"></i> Quản lý Đơn hàng
+                </a>
+
+                <div class="nav-divider"></div>
+
+                <a href="QLDanhGia.aspx" class="nav-item">
+                    <i class="fa-solid fa-comment-dots"></i> Quản lý Đánh giá
+                </a>
+
+                <a href="HoSoSeller.aspx" class="nav-item">
+                    <i class="fa-solid fa-user-gear"></i> Hồ sơ người bán
+                </a>
+
+                <div class="nav-divider"></div>
+
+                <a href="../khach/trangchu.aspx" class="nav-item">
+                    <i class="fa-solid fa-house-user"></i> Xem trang khách
+                </a>
             </div>
         </div>
 
         <div class="main-content">
             <div class="top-bar">
-                <div class="user-info">Chào, <asp:Literal ID="litSellerName" runat="server"></asp:Literal></div>
-                <asp:LinkButton ID="btnLogout" runat="server" CssClass="btn-logout" OnClick="btnLogout_Click" CausesValidation="false">Đăng xuất <i class="fa-solid fa-right-from-bracket"></i></asp:LinkButton>
+                <div class="user-info">
+                    <div class="user-avatar"><i class="fa-solid fa-user-tie"></i></div>
+                    <div>
+                        <span style="display:block; font-size:11px; color:#94a3b8; text-transform:uppercase;">Xin chào</span>
+                        <asp:Literal ID="litSellerName" runat="server" Text="Người bán"></asp:Literal>
+                    </div>
+                </div>
+
+                <asp:LinkButton ID="btnLogout" runat="server" CssClass="btn-logout" OnClick="btnLogout_Click" CausesValidation="false">
+                    <i class="fa-solid fa-power-off"></i> ĐĂNG XUẤT
+                </asp:LinkButton>
             </div>
-            <div class="content-padding">
+
+            <div class="content-padding fade-in">
                 <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server"></asp:ContentPlaceHolder>
             </div>
         </div>
     </form>
+
+    <script>
+        // Logic tự động kích hoạt class active cho menu dựa trên URL
+        document.addEventListener('DOMContentLoaded', function () {
+            const currentPath = window.location.pathname.toLowerCase();
+            document.querySelectorAll('.nav-item').forEach(link => {
+                if (link.href.toLowerCase().includes(currentPath)) {
+                    link.classList.add('active-link');
+                } else {
+                    link.classList.remove('active-link');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

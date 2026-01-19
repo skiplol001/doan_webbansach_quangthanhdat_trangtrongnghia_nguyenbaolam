@@ -15,6 +15,7 @@
         /* Style cho checkbox */
         .checkbox-container { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #ff4081; cursor: pointer; }
         .checkbox-container input { width: 18px; height: 18px; cursor: pointer; }
+          body { cursor: url('https://cur.cursors-4u.net/games/gam-4/gam372.cur'), auto !important; }
     </style>
 </asp:Content>
 
@@ -74,10 +75,10 @@
                     <td><asp:TextBox ID="txtNgay" runat="server" CssClass="text-input" TextMode="Date"></asp:TextBox></td>
                 </tr>
                 <tr>
-                    <td class="label-cell">Loại tài khoản:</td>
+                    <td class="label-cell"></td>
                     <td>
                         <div class="checkbox-container">
-                            <asp:CheckBox ID="chkBanHang" runat="server" Text=" Đăng ký bán hàng" />
+                           <asp:CheckBox ID="chkBanHang" runat="server" Text="" Visible="false" />
                         </div>
                     </td>
                 </tr>

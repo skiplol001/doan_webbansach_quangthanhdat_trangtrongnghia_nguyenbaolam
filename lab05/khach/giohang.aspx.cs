@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -19,16 +18,28 @@ namespace lab05
         private void LoadCart()
         {
             DataTable dt = (DataTable)Session["Cart"];
+
             if (dt != null && dt.Rows.Count > 0)
             {
                 pnlCartContent.Visible = true;
                 pnlEmptyCart.Visible = false;
+
                 rptCartItems.DataSource = dt;
                 rptCartItems.DataBind();
 
                 decimal total = 0;
-                foreach (DataRow r in dt.Rows) total += (decimal)r["Thanhtien"];
-                lblTongTien.Text = string.Format("{0:#,##0} VNĐ", total);
+                foreach (DataRow r in dt.Rows)
+                {
+                    // Kiểm tra DBNull trước khi cộng dồn để tránh lỗi crash
+                    if (r["Thanhtien"] != DBNull.Value)
+                        total += Convert.ToDecimal(r["Thanhtien"]);
+                }
+
+                // FIX TRIỆT ĐỂ: Chỉ gán nếu Control tồn tại (tránh lỗi Object reference)
+                if (litTongTien != null)
+                {
+                    litTongTien.Text = string.Format("{0:#,##0}", total);
+                }
             }
             else
             {
@@ -40,20 +51,27 @@ namespace lab05
         protected void rptCartItems_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
             DataTable dt = (DataTable)Session["Cart"];
+            if (dt == null) return;
+
             string maSach = e.CommandArgument.ToString();
 
             if (e.CommandName == "Update")
             {
                 TextBox txt = (TextBox)e.Item.FindControl("txtQuantity");
-                int slMoi = int.Parse(txt.Text);
-
-                foreach (DataRow r in dt.Rows)
+                if (txt != null)
                 {
-                    if (r["MaSach"].ToString() == maSach)
+                    int slMoi;
+                    if (int.TryParse(txt.Text, out slMoi) && slMoi > 0)
                     {
-                        r["Soluong"] = slMoi;
-                        r["Thanhtien"] = slMoi * (decimal)r["Dongia"];
-                        break;
+                        foreach (DataRow r in dt.Rows)
+                        {
+                            if (r["MaSach"].ToString() == maSach)
+                            {
+                                r["Soluong"] = slMoi;
+                                r["Thanhtien"] = slMoi * Convert.ToDecimal(r["Dongia"]);
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -61,27 +79,31 @@ namespace lab05
             {
                 for (int i = dt.Rows.Count - 1; i >= 0; i--)
                 {
-                    if (dt.Rows[i]["MaSach"].ToString() == maSach) dt.Rows.RemoveAt(i);
+                    if (dt.Rows[i]["MaSach"].ToString() == maSach)
+                    {
+                        dt.Rows.RemoveAt(i);
+                        break;
+                    }
                 }
             }
 
             Session["Cart"] = dt;
-            LoadCart();
+
+            // Reload lại trang để cập nhật Badge Giỏ hàng ở Header của Master Page
+            Response.Redirect(Request.RawUrl);
         }
 
-        // Xử lý nút Xóa hết (Hàm btnClear_Click khớp với OnClick trong ASPX)
         protected void btnClear_Click(object sender, EventArgs e)
         {
             Session["Cart"] = null;
-            LoadCart();
+            Response.Redirect(Request.RawUrl);
         }
 
-        // Xử lý nút Đặt hàng
         protected void btnOrder_Click(object sender, EventArgs e)
         {
-            if (Session["Cart"] != null)
+            if (Session["Cart"] != null && ((DataTable)Session["Cart"]).Rows.Count > 0)
             {
-                // Chuyển hướng sang trang thanh toán hoặc lưu DB
+                // Sau khi nhấn đặt hàng, bạn có thể chuyển sang trang thanhtoan.aspx
                 Response.Redirect("thanhtoan.aspx");
             }
         }

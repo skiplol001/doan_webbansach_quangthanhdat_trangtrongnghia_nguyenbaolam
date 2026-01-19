@@ -7,65 +7,47 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace lab05
+namespace lab05.Admin
 {
 
 
-    public partial class giohang
+    public partial class QLDanhGia
     {
 
         /// <summary>
-        /// pnlEmptyCart control.
+        /// btnConfirmDelete control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlEmptyCart;
+        protected global::System.Web.UI.WebControls.Button btnConfirmDelete;
 
         /// <summary>
-        /// pnlCartContent control.
+        /// hfDeleteID control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlCartContent;
+        protected global::System.Web.UI.WebControls.HiddenField hfDeleteID;
 
         /// <summary>
-        /// rptCartItems control.
+        /// upComments control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptCartItems;
+        protected global::System.Web.UI.UpdatePanel upComments;
 
         /// <summary>
-        /// lblTongTien control.
+        /// gvComments control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblTongTien;
-
-        /// <summary>
-        /// btnClear control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnClear;
-
-        /// <summary>
-        /// btnOrder control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton btnOrder;
+        protected global::System.Web.UI.WebControls.GridView gvComments;
     }
 }

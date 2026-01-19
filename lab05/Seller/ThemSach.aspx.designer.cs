@@ -7,83 +7,101 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace lab05
+namespace lab05.Seller
 {
 
 
-    public partial class thanhtoan
+    public partial class ThemSach
     {
 
         /// <summary>
-        /// txtHoTen control.
+        /// txtTenSach control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtHoTen;
+        protected global::System.Web.UI.WebControls.TextBox txtTenSach;
 
         /// <summary>
-        /// rfv1 control.
+        /// rfvTen control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfv1;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvTen;
 
         /// <summary>
-        /// txtDienThoai control.
+        /// ddlChuDe control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtDienThoai;
+        protected global::System.Web.UI.WebControls.DropDownList ddlChuDe;
 
         /// <summary>
-        /// txtDiaChi control.
+        /// ddlNXB control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtDiaChi;
+        protected global::System.Web.UI.WebControls.DropDownList ddlNXB;
 
         /// <summary>
-        /// txtNgayGiao control.
+        /// txtGia control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtNgayGiao;
+        protected global::System.Web.UI.WebControls.TextBox txtGia;
 
         /// <summary>
-        /// rptSummary control.
+        /// rfvGia control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptSummary;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvGia;
 
         /// <summary>
-        /// lblTongTien control.
+        /// fuAnh control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblTongTien;
+        protected global::System.Web.UI.WebControls.FileUpload fuAnh;
 
         /// <summary>
-        /// btnDatHang control.
+        /// rfvAnh control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnDatHang;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvAnh;
+
+        /// <summary>
+        /// txtMoTa control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtMoTa;
+
+        /// <summary>
+        /// btnLuu control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnLuu;
     }
 }

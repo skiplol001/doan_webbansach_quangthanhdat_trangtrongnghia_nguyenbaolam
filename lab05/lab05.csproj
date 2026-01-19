@@ -67,13 +67,77 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Images\agatha_christie.jpg" />
+    <Content Include="Images\anhhungxadieu.jpg" />
+    <Content Include="Images\banhchung.jpg" />
     <Content Include="Images\bg.gif" />
+    <Content Include="Images\cayda.jpg" />
+    <Content Include="Images\caytre100dot.jpg" />
+    <Content Include="Images\chip_hardware.jpg" />
+    <Content Include="Images\chuahoang.jpg" />
+    <Content Include="Images\chungcu727.jfif" />
+    <Content Include="Images\conrongchautien.jpg" />
+    <Content Include="Images\dialy_nhanvan.jpg" />
+    <Content Include="Images\disan_hoian.jpg" />
+    <Content Include="Images\doitho_phongsu.jpg" />
+    <Content Include="Images\duahau.jpg" />
+    <Content Include="Images\dulich_mientrung.jpg" />
+    <Content Include="Images\eragon.jpg" />
+    <Content Include="Images\geo_discovery.jpg" />
+    <Content Include="Images\gintama.jpg" />
+    <Content Include="Images\grandblue.jpg" />
+    <Content Include="Images\gto.jpg" />
+    <Content Include="Images\guong.jpg" />
+    <Content Include="Images\hamthuthiem.jpg" />
+    <Content Include="Images\hamvang.jpg" />
+    <Content Include="Images\hanhtrinh_congly.jpg" />
+    <Content Include="Images\harry_potter_1.jpg" />
+    <Content Include="Images\heritage_hanoi.jpg" />
+    <Content Include="Images\hoguom.jpg" />
+    <Content Include="Images\khampha_thegioi.jpg" />
+    <Content Include="Images\khaoco_dongson.jpg" />
+    <Content Include="Images\kysu_muusinh.jpg" />
+    <Content Include="Images\lichsu_quansu.jpg" />
+    <Content Include="Images\linhmieu.jpg" />
+    <Content Include="Images\lotr_doan_ho_nhan.jpg" />
+    <Content Include="Images\mada.jpg" />
+    <Content Include="Images\moitruong_xanh.jpg" />
+    <Content Include="Images\natgeo_traveler.jpg" />
+    <Content Include="Images\natgeo_vn.jpg" />
+    <Content Include="Images\nghicanx.jpg" />
+    <Content Include="Images\nghiencuu_lichsu.jpg" />
+    <Content Include="Images\onepunchman.jpg" />
+    <Content Include="Images\pcworld_ai.jpg" />
+    <Content Include="Images\percy_jackson.jpg" />
+    <Content Include="Images\phongsu_congnghe.jpg" />
+    <Content Include="Images\phongsu_thegioingam.jpg" />
+    <Content Include="Images\sakamoto.jpg" />
+    <Content Include="Images\science_tech_future.jpg" />
+    <Content Include="Images\security_tech.jpg" />
+    <Content Include="Images\sherlock_holmes.jpg" />
+    <Content Include="Images\silence_lambs.jpg" />
+    <Content Include="Images\sontinhthuytinh.jpg" />
+    <Content Include="Images\tamcam.jpg" />
+    <Content Include="Images\tapchi_laptrinh.jpg" />
+    <Content Include="Images\tayduky.jpg" />
+    <Content Include="Images\thachsanh.jpg" />
+    <Content Include="Images\thandieu.jpg" />
+    <Content Include="Images\thanhgiong.jpg" />
+    <Content Include="Images\the_lost_symbol.jpg" />
+    <Content Include="Images\thienlongbatbo.jpg" />
+    <Content Include="Images\tieungao.jpg" />
+    <Content Include="Images\traucau.jpg" />
+    <Content Include="Images\travel_leisure_island.jpg" />
+    <Content Include="Images\wanderlust_world.jpg" />
+    <Content Include="Images\xebuyt44.jfif" />
+    <Content Include="Images\xuanay_saigon.jpg" />
+    <Content Include="Images\ythien.jpg" />
     <Content Include="khach\chitiet.aspx" />
     <Content Include="khach\dangky.aspx" />
     <Content Include="khach\dangnhap.aspx" />
     <Content Include="khach\danhsach.aspx" />
     <Content Include="default.aspx" />
-    <Content Include="giohang.aspx" />
+    <Content Include="khach\giohang.aspx" />
     <Content Include="Images\101Cakhuc.jpg" />
     <Content Include="Images\aloVietnam.jpg" />
     <Content Include="Images\caosuvietnam.jpg" />
@@ -112,11 +176,18 @@
     <Content Include="Images\TH008.jpg" />
     <Content Include="Images\Vanhoatrungquoc.jpg" />
     <Content Include="Images\xuatan.jpg" />
+    <Content Include="khach\leaderboard.aspx" />
+    <Content Include="khach\sanpham-daxem.aspx" />
+    <Content Include="khach\thongtin-taikhoan.aspx" />
+    <Content Include="Seller\HoSoSeller.aspx" />
+    <Content Include="Seller\QLDanhGia.aspx" />
     <Content Include="Seller\QLDonHang.aspx" />
-    <Content Include="Seller\Seller.aspx" />
     <Content Include="Seller\Dashboard.aspx" />
     <Content Include="Seller\QLSach.aspx" />
-    <Content Include="thanhtoan.aspx" />
+    <Content Include="Seller\QLTaiKhoan.aspx" />
+    <Content Include="Seller\SuaSach.aspx" />
+    <Content Include="Seller\ThemSach.aspx" />
+    <Content Include="khach\thanhtoan.aspx" />
     <Content Include="khach\trangchu.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -163,14 +234,49 @@
     <Compile Include="default.Master.designer.cs">
       <DependentUpon>default.Master</DependentUpon>
     </Compile>
-    <Compile Include="giohang.aspx.cs">
+    <Compile Include="khach\giohang.aspx.cs">
       <DependentUpon>giohang.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="giohang.aspx.designer.cs">
+    <Compile Include="khach\giohang.aspx.designer.cs">
       <DependentUpon>giohang.aspx</DependentUpon>
     </Compile>
+    <Compile Include="khach\leaderboard.aspx.cs">
+      <DependentUpon>leaderboard.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="khach\leaderboard.aspx.designer.cs">
+      <DependentUpon>leaderboard.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="khach\sanpham-daxem.aspx.cs">
+      <DependentUpon>sanpham-daxem.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="khach\sanpham-daxem.aspx.designer.cs">
+      <DependentUpon>sanpham-daxem.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="khach\thongtin-taikhoan.aspx.cs">
+      <DependentUpon>thongtin-taikhoan.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="khach\thongtin-taikhoan.aspx.designer.cs">
+      <DependentUpon>thongtin-taikhoan.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Seller\HoSoSeller.aspx.cs">
+      <DependentUpon>HoSoSeller.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Seller\HoSoSeller.aspx.designer.cs">
+      <DependentUpon>HoSoSeller.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Seller\QLDanhGia.aspx.cs">
+      <DependentUpon>QLDanhGia.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Seller\QLDanhGia.aspx.designer.cs">
+      <DependentUpon>QLDanhGia.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Seller\QLDonHang.aspx.cs">
       <DependentUpon>QLDonHang.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -178,19 +284,19 @@
     <Compile Include="Seller\QLDonHang.aspx.designer.cs">
       <DependentUpon>QLDonHang.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Seller\QLTaiKhoan.aspx.cs">
+      <DependentUpon>QLTaiKhoan.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Seller\QLTaiKhoan.aspx.designer.cs">
+      <DependentUpon>QLTaiKhoan.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Seller\Seller.Master.cs">
       <DependentUpon>Seller.Master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Seller\Seller.Master.designer.cs">
       <DependentUpon>Seller.Master</DependentUpon>
-    </Compile>
-    <Compile Include="Seller\Seller.aspx.cs">
-      <DependentUpon>Seller.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Seller\Seller.aspx.designer.cs">
-      <DependentUpon>Seller.aspx</DependentUpon>
     </Compile>
     <Compile Include="Seller\Dashboard.aspx.cs">
       <DependentUpon>Dashboard.aspx</DependentUpon>
@@ -206,11 +312,25 @@
     <Compile Include="Seller\QLSach.aspx.designer.cs">
       <DependentUpon>QLSach.aspx</DependentUpon>
     </Compile>
-    <Compile Include="thanhtoan.aspx.cs">
+    <Compile Include="Seller\SuaSach.aspx.cs">
+      <DependentUpon>SuaSach.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Seller\SuaSach.aspx.designer.cs">
+      <DependentUpon>SuaSach.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Seller\ThemSach.aspx.cs">
+      <DependentUpon>ThemSach.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Seller\ThemSach.aspx.designer.cs">
+      <DependentUpon>ThemSach.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="khach\thanhtoan.aspx.cs">
       <DependentUpon>thanhtoan.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="thanhtoan.aspx.designer.cs">
+    <Compile Include="khach\thanhtoan.aspx.designer.cs">
       <DependentUpon>thanhtoan.aspx</DependentUpon>
     </Compile>
     <Compile Include="khach\trangchu.aspx.cs">

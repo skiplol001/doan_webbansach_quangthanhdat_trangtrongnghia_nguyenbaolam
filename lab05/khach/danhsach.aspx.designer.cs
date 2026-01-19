@@ -24,6 +24,24 @@ namespace lab05
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl hTitle;
 
         /// <summary>
+        /// pnlEmpty control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlEmpty;
+
+        /// <summary>
+        /// upList control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.UpdatePanel upList;
+
+        /// <summary>
         /// rptSach control.
         /// </summary>
         /// <remarks>
@@ -33,13 +51,13 @@ namespace lab05
         protected global::System.Web.UI.WebControls.Repeater rptSach;
 
         /// <summary>
-        /// lnkPrev control.
+        /// lnkFirst control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkPrev;
+        protected global::System.Web.UI.WebControls.HyperLink lnkFirst;
 
         /// <summary>
         /// rptPagination control.
@@ -51,12 +69,12 @@ namespace lab05
         protected global::System.Web.UI.WebControls.Repeater rptPagination;
 
         /// <summary>
-        /// lnkNext control.
+        /// lnkLast control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkNext;
+        protected global::System.Web.UI.WebControls.HyperLink lnkLast;
     }
 }
