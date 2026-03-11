@@ -1,4 +1,4 @@
-﻿<%@ Page Title="CHI TIẾT SÁCH" Language="C#" MasterPageFile="~/default.Master" AutoEventWireup="true" CodeBehind="chitiet.aspx.cs" Inherits="lab05.chitiet" %>
+﻿ <%@ Page Title="CHI TIẾT SÁCH" Language="C#" MasterPageFile="~/default.Master" AutoEventWireup="true" CodeBehind="chitiet.aspx.cs" Inherits="lab05.chitiet" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <style>
@@ -38,6 +38,10 @@
         }
         .menu-item:hover { background: #fff0f6; color: #ff4081; }
 
+        /* --- STYLE AVATAR TRONG BÌNH LUẬN (MỚI) --- */
+        .user-info-box { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
+        .comment-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #fdf2f8; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+
         .edit-mode-box { background: #f8fafc; padding: 20px; border-radius: 15px; border: 1px solid #e2e8f0; margin-top: 10px; }
 
         .btn-gui-bl { background: #333; color: white; border: none; padding: 12px 35px; border-radius: 10px; font-weight: 700; cursor: pointer; margin-top: 15px; transition: 0.3s; }
@@ -57,7 +61,7 @@
         #toastBox.active { bottom: 40px; }
         #toastBox i { font-size: 1.2rem; color: #4ade80; }
 
-        /* --- CUSTOM MODAL DELETE (THÊM MỚI) --- */
+        /* --- CUSTOM MODAL DELETE --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
@@ -65,24 +69,19 @@
             opacity: 0; transition: 0.3s;
         }
         .modal-overlay.active { display: flex; opacity: 1; }
-
         .modal-content {
             background: white; padding: 35px; border-radius: 24px; max-width: 400px; width: 90%;
             text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
             transform: scale(0.8); transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .modal-overlay.active .modal-content { transform: scale(1); }
-
         .modal-icon { width: 60px; height: 60px; background: #fff1f2; color: #e11d48; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 20px; }
         .modal-title { font-size: 1.2rem; font-weight: 800; color: #1e293b; margin-bottom: 10px; }
         .modal-desc { color: #64748b; font-size: 14px; line-height: 1.6; margin-bottom: 30px; }
-        
         .modal-actions { display: flex; gap: 12px; justify-content: center; }
         .btn-modal { padding: 12px 25px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; font-size: 14px; }
         .btn-confirm { background: #e11d48; color: white; }
-        .btn-confirm:hover { background: #be123c; }
         .btn-cancel { background: #f1f5f9; color: #475569; }
-        .btn-cancel:hover { background: #e2e8f0; }
     </style>
 
     <script>
@@ -93,7 +92,6 @@
             setTimeout(function () { toast.classList.remove("active"); }, 3000);
         }
 
-        // Logic Modal Xóa
         function openDeleteModal(maBL) {
             document.getElementById('<%= hfDeleteID.ClientID %>').value = maBL;
             document.getElementById('deleteModal').classList.add('active');
@@ -108,7 +106,6 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
     <div id="toastBox"></div>
 
-    <%-- CẤU TRÚC MODAL XÓA (THÊM MỚI) --%>
     <div id="deleteModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-icon"><i class="fa-solid fa-trash-can"></i></div>
@@ -185,7 +182,6 @@
                                                 <asp:LinkButton ID="btnEdit" runat="server" CommandName="EditMode" CssClass="menu-item">
                                                     <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa
                                                 </asp:LinkButton>
-                                                <%-- FIX LỖI: GỌI MODAL THAY VÌ CONFIM HTML --%>
                                                 <asp:LinkButton ID="btnDelete" runat="server" CssClass="menu-item" 
                                                     OnClientClick='<%# "openDeleteModal(" + Eval("MaBL") + "); return false;" %>'>
                                                     <i class="fa-solid fa-trash-can"></i> Xóa
@@ -193,12 +189,18 @@
                                             </div>
                                         </div>
 
-                                        <div class="user-info">
-                                            <span style="font-weight:800;"><i class="fa-solid fa-circle-user" style="color:#ff4081;"></i> <%# Eval("HoTenKH") %></span>
-                                            <span style="font-size:12px; color:#bbb; margin-left:10px;"><%# Eval("NgayBL", "{0:dd/MM/yyyy HH:mm}") %></span>
+                                        <div class="user-info-box">
+                                            <img src='<%# ResolveUrl("~/Images/") + (Eval("AnhKH") != DBNull.Value && !string.IsNullOrEmpty(Eval("AnhKH").ToString()) ? Eval("AnhKH") : "no-avatar.jpg") %>' 
+                                                 class="comment-avatar" 
+                                                 onerror="this.src='../Images/no-avatar.jpg'" />
+                                            <div>
+                                                <div style="font-weight:800; color:#1e293b;"><%# Eval("HoTenKH") %></div>
+                                                <div style="font-size:11px; color:#bbb;"><%# Eval("NgayBL", "{0:dd/MM/yyyy HH:mm}") %></div>
+                                            </div>
                                         </div>
+
                                         <div style="color:#ffc107; margin: 8px 0;"><%# RenderStars(Eval("DanhGia")) %></div>
-                                        <div style="color:#666;"><%# Eval("NoiDung") %></div>
+                                        <div style="color:#666; padding-left: 60px;"><%# Eval("NoiDung") %></div>
                                     </asp:Panel>
 
                                     <asp:Panel ID="pnlEdit" runat="server" Visible="false" CssClass="edit-mode-box">
@@ -230,8 +232,8 @@
         </asp:SqlDataSource>
 
         <asp:SqlDataSource ID="SqlDataSourceComments" runat="server" ConnectionString="<%$ ConnectionStrings:BookStoreDB %>"
-            SelectCommand="SELECT C.*, K.HoTenKH FROM Comment C JOIN KhachHang K ON C.MaKH = K.MaKH WHERE C.MaSach = @MaSach ORDER BY C.NgayBL DESC">
+            SelectCommand="SELECT C.*, K.HoTenKH, K.AnhKH FROM Comment C JOIN KhachHang K ON C.MaKH = K.MaKH WHERE C.MaSach = @MaSach ORDER BY C.NgayBL DESC">
             <SelectParameters><asp:QueryStringParameter Name="MaSach" QueryStringField="MaSach" Type="Int32" /></SelectParameters>
         </asp:SqlDataSource>
     </div>
-</asp:Content>
+</asp:Content>  

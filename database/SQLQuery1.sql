@@ -623,3 +623,6 @@ ORDER BY P.MaLoai;
 GO
 ALTER TABLE KhachHang ADD IsOnline BIT DEFAULT 0;
 ALTER TABLE KhachHang ADD LastSeen DATETIME;
+/* Chạy lệnh này để thêm cột lưu tên file ảnh đại diện */
+ALTER TABLE KhachHang ADD AnhKH NVARCHAR(MAX) DEFAULT 'no-avatar.jpg';
+

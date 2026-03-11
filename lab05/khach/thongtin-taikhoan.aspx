@@ -1,26 +1,47 @@
-﻿<%@ Page Title="Hồ sơ người dùng" Language="C#" MasterPageFile="~/default.Master" AutoEventWireup="true" CodeBehind="thongtin-taikhoan.aspx.cs" Inherits="lab05.thongtin_taikhoan" %>
+﻿<%@ Page Title="Hồ sơ cá nhân" Language="C#" MasterPageFile="~/default.Master" AutoEventWireup="true" CodeBehind="thongtin-taikhoan.aspx.cs" Inherits="lab05.thongtin_taikhoan" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <style>
-        .account-wrapper { max-width: 1240px; margin: 40px auto; display: grid; grid-template-columns: 350px 1fr; gap: 30px; padding: 0 20px; }
-        .profile-card, .orders-card { background: #ffffff; padding: 30px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
-        
-        .section-header { display: flex; align-items: center; gap: 10px; font-weight: 800; color: #1e293b; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #fdf2f8; text-transform: uppercase; font-size: 1rem; }
+        :root { --primary: #ff4081; --primary-hover: #f50057; --bg-card: #ffffff; }
 
-        /* Style dòng thông tin (Bên trái) */
-        .info-row { margin-bottom: 22px; padding-left: 15px; border-left: 4px solid #ff4081; background: #fffcfd; padding: 12px; border-radius: 0 12px 12px 0; }
-        .info-label { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px; }
-        .info-value { font-size: 15px; font-weight: 700; color: #334155; }
-
-        /* Bảng Đơn hàng (Bên phải) */
-        .order-table { width: 100%; border-collapse: collapse; }
-        .order-table th { text-align: left; padding: 15px; background: #f8fafc; color: #64748b; font-size: 11px; font-weight: 800; text-transform: uppercase; border-bottom: 2px solid #f1f5f9; }
-        .order-table td { padding: 18px 15px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        /* PHÓNG TO GIAO DIỆN 120% */
+        .account-wrapper { max-width: 1280px; margin: 40px auto; display: grid; grid-template-columns: 380px 1fr; gap: 35px; padding: 0 20px; font-size: 15px; }
+        .profile-card, .orders-card { background: var(--bg-card); padding: 35px; border-radius: 28px; box-shadow: 0 15px 40px rgba(0,0,0,0.06); border: 1px solid #f1f5f9; }
         
-        .book-img-small { width: 50px; height: 70px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .status-badge { padding: 6px 14px; border-radius: 50px; font-size: 10px; font-weight: 700; text-transform: uppercase; display: inline-flex; align-items: center; gap: 5px; }
-        .status-delivered { background: #dcfce7; color: #166534; }
-        .status-pending { background: #fef3c7; color: #92400e; }
+        .section-header { display: flex; align-items: center; gap: 12px; font-weight: 900; color: #1e293b; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #fdf2f8; text-transform: uppercase; font-size: 1.1rem; }
+
+        /* --- PHẦN AVATAR --- */
+        .avatar-section { text-align: center; margin-bottom: 30px; position: relative; }
+        .avatar-img { width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 5px solid #fff; box-shadow: 0 10px 25px rgba(255, 64, 129, 0.2); background: #f8fafc; margin-bottom: 15px; }
+        .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; }
+        .btn-upload { border: 2px solid #e2e8f0; color: #64748b; background-color: white; padding: 8px 20px; border-radius: 12px; font-size: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; }
+        .btn-upload:hover { border-color: var(--primary); color: var(--primary); }
+        .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
+
+        /* --- FORM CHỈNH SỬA --- */
+        .form-group { margin-bottom: 25px; }
+        .form-label { display: block; font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; }
+        .form-control-edit { width: 100%; padding: 14px 18px; border: 2px solid #f1f5f9; border-radius: 14px; font-size: 15px; font-weight: 700; color: #334155; transition: 0.3s; background: #fffcfd; }
+        .form-control-edit:focus { border-color: var(--primary); outline: none; background: #fff; box-shadow: 0 0 0 5px rgba(255, 64, 129, 0.05); }
+        .form-control-readonly { background: #f8fafc; border-color: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+
+        .btn-save-profile { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 16px; font-weight: 900; width: 100%; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(255, 64, 129, 0.2); text-transform: uppercase; letter-spacing: 1px; }
+        .btn-save-profile:hover { transform: translateY(-3px); background: var(--primary-hover); box-shadow: 0 15px 30px rgba(255, 64, 129, 0.3); }
+
+        /* --- LỊCH SỬ MUA HÀNG --- */
+        .order-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+        .order-table th { text-align: left; padding: 15px 20px; color: #64748b; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+        .order-table td { padding: 20px; background: #fff; vertical-align: middle; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; }
+        .order-table td:first-child { border-left: 1px solid #f1f5f9; border-top-left-radius: 15px; border-bottom-left-radius: 15px; }
+        .order-table td:last-child { border-right: 1px solid #f1f5f9; border-top-right-radius: 15px; border-bottom-right-radius: 15px; }
+        
+        .book-link { display: flex; align-items: center; gap: 15px; text-decoration: none; color: #1e293b; font-weight: 800; transition: 0.2s; }
+        .book-link:hover { color: var(--primary); }
+        .book-img-small { width: 55px; height: 75px; object-fit: cover; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+
+        .status-badge { padding: 8px 16px; border-radius: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px; }
+        .status-delivered { background: #ecfdf5; color: #10b981; }
+        .status-pending { background: #fffbeb; color: #d97706; }
 
         @media (max-width: 992px) { .account-wrapper { grid-template-columns: 1fr; } }
     </style>
@@ -28,65 +49,81 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
     <div class="account-wrapper">
-        <%-- TRÁI: THÔNG TIN CÁ NHÂN (ẨN HẲN NẾU THIẾU) --%>
+        <%-- PHẦN 1: CẬP NHẬT HỒ SƠ --%>
         <aside class="profile-card">
-            <div class="section-header"><i class="fa-solid fa-user-shield" style="color:#ff4081;"></i> Hồ sơ cá nhân</div>
+            <div class="section-header"><i class="fa-solid fa-user-pen" style="color:var(--primary);"></i> Chỉnh sửa hồ sơ</div>
 
-            <asp:Panel ID="pnlHoTen" runat="server" CssClass="info-row">
-                <div class="info-label">Họ tên khách hàng</div>
-                <div class="info-value"><asp:Literal ID="litHoTen" runat="server" /></div>
-            </asp:Panel>
+            <div class="avatar-section">
+                <asp:Image ID="imgKH" runat="server" CssClass="avatar-img" ImageUrl="~/Images/no-avatar.jpg" />
+                <div class="upload-btn-wrapper">
+                    <button class="btn-upload"><i class="fa-solid fa-camera"></i> Đổi ảnh đại diện</button>
+                    <asp:FileUpload ID="fuAvatar" runat="server" onchange="this.form.submit()" />
+                </div>
+            </div>
 
-            <asp:Panel ID="pnlTenDN" runat="server" CssClass="info-row">
-                <div class="info-label">Tên đăng nhập</div>
-                <div class="info-value"><asp:Literal ID="litTenDN" runat="server" /></div>
-            </asp:Panel>
+            <div class="form-group">
+                <label class="form-label">Họ tên của bạn</label>
+                <asp:TextBox ID="txtHoTen" runat="server" CssClass="form-control-edit" placeholder="Nhập họ tên..."></asp:TextBox>
+            </div>
 
-            <asp:Panel ID="pnlEmail" runat="server" CssClass="info-row">
-                <div class="info-label">Địa chỉ Email</div>
-                <div class="info-value"><asp:Literal ID="litEmail" runat="server" /></div>
-            </asp:Panel>
+            <div class="form-group">
+                <label class="form-label">Tên đăng nhập (Cố định)</label>
+                <asp:TextBox ID="txtTenDN" runat="server" CssClass="form-control-edit form-control-readonly" ReadOnly="true"></asp:TextBox>
+            </div>
 
-            <asp:Panel ID="pnlDienThoai" runat="server" CssClass="info-row">
-                <div class="info-label">Số điện thoại</div>
-                <div class="info-value"><asp:Literal ID="litDienThoai" runat="server" /></div>
-            </asp:Panel>
+            <div class="form-group">
+                <label class="form-label">Email liên hệ</label>
+                <asp:TextBox ID="txtEmail" runat="server" CssClass="form-control-edit" TextMode="Email"></asp:TextBox>
+            </div>
 
-            <asp:Panel ID="pnlDiaChi" runat="server" CssClass="info-row">
-                <div class="info-label">Địa chỉ giao hàng</div>
-                <div class="info-value"><asp:Literal ID="litDiaChi" runat="server" /></div>
-            </asp:Panel>
+            <div class="form-group">
+                <label class="form-label">Số điện thoại</label>
+                <asp:TextBox ID="txtDienThoai" runat="server" CssClass="form-control-edit"></asp:TextBox>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Địa chỉ nhận hàng</label>
+                <asp:TextBox ID="txtDiaChi" runat="server" CssClass="form-control-edit" TextMode="MultiLine" Rows="2"></asp:TextBox>
+            </div>
+
+            <asp:Button ID="btnUpdate" runat="server" Text="LƯU THÔNG TIN" CssClass="btn-save-profile" OnClick="btnUpdate_Click" />
         </aside>
 
-        <%-- PHẢI: DANH SÁCH SÁCH ĐÃ MUA --%>
+        <%-- PHẦN 2: LỊCH SỬ MUA HÀNG --%>
         <main class="orders-card">
-            <div class="section-header"><i class="fa-solid fa-receipt" style="color:#ff4081;"></i> Lịch sử mua hàng</div>
+            <div class="section-header"><i class="fa-solid fa-clock-rotate-left" style="color:var(--primary);"></i> Lịch sử mua hàng</div>
 
-            <asp:GridView ID="gvPurchasedBooks" runat="server" AutoGenerateColumns="False" CssClass="order-table" GridLines="None" Width="100%">
+            <asp:GridView ID="gvPurchasedBooks" runat="server" AutoGenerateColumns="False" CssClass="order-table" GridLines="None">
                 <Columns>
-                    <asp:TemplateField HeaderText="Sách đã mua">
+                    <asp:TemplateField HeaderText="Thông tin sản phẩm">
                         <ItemTemplate>
-                            <div style="display:flex; align-items:center; gap:15px;">
-                                <img src='<%# ResolveUrl("~/Images/") + Eval("AnhBia") %>' class="book-img-small" onerror="this.src='../Images/no-image.jpg'" />
-                                <span style="font-weight:800; color:#1e293b;"><%# Eval("TenSach") %></span>
-                            </div>
+                            <a href='<%# "chitiet.aspx?MaSach=" + Eval("MaSach") %>' class="book-link">
+                                <img src='<%# ResolveUrl("~/Images/") + Eval("AnhBia") %>' class="book-img-small" />
+                                <span><%# Eval("TenSach") %></span>
+                            </a>
                         </ItemTemplate>
                     </asp:TemplateField>
 
-                    <asp:BoundField DataField="NgayDH" HeaderText="Ngày đặt" DataFormatString="{0:dd/MM/yyyy}" ItemStyle-Font-Bold="true" />
+                    <asp:BoundField DataField="NgayDH" HeaderText="Ngày mua" DataFormatString="{0:dd/MM/yyyy}" ItemStyle-Width="120px" ItemStyle-Font-Bold="true" />
+
+                    <asp:TemplateField HeaderText="Thành tiền">
+                        <ItemTemplate>
+                            <span style="color:var(--primary); font-weight:800;"><%# string.Format("{0:#,##0}đ", Eval("Thanhtien")) %></span>
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
                     <asp:TemplateField HeaderText="Trạng thái">
                         <ItemTemplate>
                             <%# (bool)Eval("Dagiao") ? 
-                                "<span class='status-badge status-delivered'><i class='fa-solid fa-circle-check'></i> Đã giao hàng</span>" : 
-                                "<span class='status-badge status-pending'><i class='fa-solid fa-clock-rotate-left'></i> Đang xử lý</span>" %>
+                                "<span class='status-badge status-delivered'><i class='fa-solid fa-check'></i> Thành công</span>" : 
+                                "<span class='status-badge status-pending'><i class='fa-solid fa-truck-fast'></i> Đang giao</span>" %>
                         </ItemTemplate>
                     </asp:TemplateField>
                 </Columns>
                 <EmptyDataTemplate>
-                    <div style="text-align:center; padding:60px; color:#94a3b8;">
-                        <i class="fa-solid fa-box-open" style="font-size:40px; margin-bottom:15px; opacity:0.3;"></i><br />
-                        Bạn chưa sở hữu quyển sách nào. Hãy bắt đầu mua sắm ngay!
+                    <div style="text-align:center; padding:100px 0; color:#cbd5e1;">
+                        <i class="fa-solid fa-cart-arrow-down" style="font-size:60px; margin-bottom:20px;"></i>
+                        <h3 style="color:#94a3b8;">Bạn chưa mua quyển sách nào!</h3>
                     </div>
                 </EmptyDataTemplate>
             </asp:GridView>

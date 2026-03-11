@@ -1,21 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Configuration;
+using System.IO;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 
 namespace lab05
 {
     public partial class thongtin_taikhoan : System.Web.UI.Page
     {
-        // Chuỗi kết nối từ Web.config
         string strCon = ConfigurationManager.ConnectionStrings["BookStoreDB"].ConnectionString;
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Kiểm tra bảo mật Session
+            // Kiểm tra đăng nhập
             if (Session["MaKH"] == null)
             {
                 Response.Redirect("~/khach/dangnhap.aspx");
@@ -24,86 +22,110 @@ namespace lab05
 
             if (!IsPostBack)
             {
-                LoadUserBasicInfo();
-                LoadPurchasedBooks();
+                LoadProfile();
+                LoadPurchaseHistory();
+            }
+
+            // Xử lý upload ảnh tức thì khi chọn file
+            if (IsPostBack && fuAvatar.HasFile)
+            {
+                UploadAvatar();
             }
         }
 
-        private void LoadUserBasicInfo()
+        private void LoadProfile()
         {
-            using (SqlConnection con = new SqlConnection(strCon))
+            using (SqlConnection conn = new SqlConnection(strCon))
             {
-                // Sửa tên cột SQL: Diachi, Dienthoai
-                string sql = "SELECT HoTenKH, TenDN, Email, Diachi, Dienthoai FROM KhachHang WHERE MaKH = @MaKH";
-                SqlCommand cmd = new SqlCommand(sql, con);
-                cmd.Parameters.AddWithValue("@MaKH", Session["MaKH"]);
-
-                try
+                string sql = "SELECT * FROM KhachHang WHERE MaKH = @id";
+                SqlCommand cmd = new SqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@id", Session["MaKH"]);
+                conn.Open();
+                SqlDataReader dr = cmd.ExecuteReader();
+                if (dr.Read())
                 {
-                    con.Open();
-                    SqlDataReader dr = cmd.ExecuteReader();
-                    if (dr.Read())
-                    {
-                        // Gọi hàm SetInfoField để tự động ẩn Panel nếu dữ liệu rỗng
-                        SetInfoField(pnlHoTen, litHoTen, dr["HoTenKH"]);
-                        SetInfoField(pnlTenDN, litTenDN, dr["TenDN"]);
-                        SetInfoField(pnlEmail, litEmail, dr["Email"]);
-                        SetInfoField(pnlDienThoai, litDienThoai, dr["Dienthoai"]);
-                        SetInfoField(pnlDiaChi, litDiaChi, dr["Diachi"]);
-                    }
-                    con.Close();
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine("Lỗi SQL Info: " + ex.Message);
+                    txtHoTen.Text = dr["HoTenKH"].ToString();
+                    txtTenDN.Text = dr["TenDN"].ToString();
+                    txtEmail.Text = dr["Email"].ToString();
+                    txtDienThoai.Text = dr["Dienthoai"].ToString();
+                    txtDiaChi.Text = dr["Diachi"].ToString();
+
+                    // Hiển thị ảnh đại diện
+                    string img = dr["AnhKH"].ToString();
+                    imgKH.ImageUrl = "~/Images/" + (string.IsNullOrEmpty(img) ? "no-avatar.jpg" : img);
                 }
             }
         }
 
-        /// <summary>
-        /// Hàm logic chính: Có dữ liệu mới hiện Panel, thiếu thì ẩn hẳn.
-        /// </summary>
-        private void SetInfoField(Panel pnl, Literal lit, object value)
+        private void LoadPurchaseHistory()
         {
-            // Kiểm tra: Khác Null, Khác DBNull và không phải chuỗi trắng
-            if (value != null && value != DBNull.Value && !string.IsNullOrWhiteSpace(value.ToString()))
+            using (SqlConnection conn = new SqlConnection(strCon))
             {
-                lit.Text = value.ToString();
-                pnl.Visible = true; // Hiện Panel
-            }
-            else
-            {
-                pnl.Visible = false; // ẨN HẲN THÔNG TIN NẾU THIẾU
-            }
-        }
+                // Lấy thông tin sách thông qua JOIN 3 bảng: Sach, CTDatHang, DonDatHang [cite: 2026-03-11]
+                string sql = @"SELECT S.MaSach, S.TenSach, S.AnhBia, D.NgayDH, D.Dagiao, CT.Thanhtien 
+                               FROM Sach S 
+                               JOIN CTDatHang CT ON S.MaSach = CT.MaSach 
+                               JOIN DonDatHang D ON CT.SoDH = D.SoDH 
+                               WHERE D.MaKH = @id 
+                               ORDER BY D.NgayDH DESC";
 
-        private void LoadPurchasedBooks()
-        {
-            using (SqlConnection con = new SqlConnection(strCon))
-            {
-                // FIX QUAN TRỌNG: Đổi ChiTietDonHang thành CTDatHang để hiển thị được đơn hàng đã mua
-                string sql = @"SELECT S.TenSach, S.AnhBia, S.Dongia, D.NgayDH, D.Dagiao 
-                             FROM DonDatHang D 
-                             INNER JOIN CTDatHang CT ON D.SoDH = CT.SoDH 
-                             INNER JOIN Sach S ON CT.MaSach = S.MaSach 
-                             WHERE D.MaKH = @MaKH 
-                             ORDER BY D.NgayDH DESC";
-
-                SqlDataAdapter da = new SqlDataAdapter(sql, con);
-                da.SelectCommand.Parameters.AddWithValue("@MaKH", Session["MaKH"]);
-
+                SqlDataAdapter da = new SqlDataAdapter(sql, conn);
+                da.SelectCommand.Parameters.AddWithValue("@id", Session["MaKH"]);
                 DataTable dt = new DataTable();
-                try
+                da.Fill(dt);
+                gvPurchasedBooks.DataSource = dt;
+                gvPurchasedBooks.DataBind();
+            }
+        }
+
+        protected void btnUpdate_Click(object sender, EventArgs e)
+        {
+            using (SqlConnection conn = new SqlConnection(strCon))
+            {
+                string sql = @"UPDATE KhachHang SET HoTenKH=@ten, Email=@email, Dienthoai=@sdt, Diachi=@dc 
+                               WHERE MaKH=@id";
+                SqlCommand cmd = new SqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@ten", txtHoTen.Text.Trim());
+                cmd.Parameters.AddWithValue("@email", txtEmail.Text.Trim());
+                cmd.Parameters.AddWithValue("@sdt", txtDienThoai.Text.Trim());
+                cmd.Parameters.AddWithValue("@dc", txtDiaChi.Text.Trim());
+                cmd.Parameters.AddWithValue("@id", Session["MaKH"]);
+
+                conn.Open();
+                if (cmd.ExecuteNonQuery() > 0)
                 {
-                    da.Fill(dt);
-                    // Bind dữ liệu vào GridView để hiển thị danh sách sách khách đã mua
-                    gvPurchasedBooks.DataSource = dt;
-                    gvPurchasedBooks.DataBind();
+                    // Cập nhật lại Session HoTen để Header thay đổi ngay lập tức [cite: 2026-03-11]
+                    Session["HoTen"] = txtHoTen.Text.Trim();
+                    ScriptManager.RegisterStartupScript(this, GetType(), "alert", "alert('Cập nhật thông tin thành công!');", true);
                 }
-                catch (Exception ex)
+            }
+        }
+
+        private void UploadAvatar()
+        {
+            string maKH = Session["MaKH"].ToString();
+            string ext = Path.GetExtension(fuAvatar.FileName);
+            // Đặt tên ảnh theo cấu trúc: avatars-MaKH.jpg [cite: 2026-03-11]
+            string fileName = "avatars-" + maKH + ext;
+            string path = Server.MapPath("~/Images/") + fileName;
+
+            try
+            {
+                fuAvatar.SaveAs(path);
+
+                using (SqlConnection conn = new SqlConnection(strCon))
                 {
-                    System.Diagnostics.Debug.WriteLine("Lỗi Load Purchased Books: " + ex.Message);
+                    SqlCommand cmd = new SqlCommand("UPDATE KhachHang SET AnhKH=@anh WHERE MaKH=@id", conn);
+                    cmd.Parameters.AddWithValue("@anh", fileName);
+                    cmd.Parameters.AddWithValue("@id", maKH);
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
                 }
+                LoadProfile(); // Nạp lại ảnh mới
+            }
+            catch (Exception ex)
+            {
+                ScriptManager.RegisterStartupScript(this, GetType(), "err", $"alert('Lỗi tải ảnh: {ex.Message}');", true);
             }
         }
     }

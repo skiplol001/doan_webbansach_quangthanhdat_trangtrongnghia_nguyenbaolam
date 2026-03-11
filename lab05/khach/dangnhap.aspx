@@ -2,53 +2,54 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <style>
-        .login-container { max-width: 400px; margin: 50px auto; padding: 0 20px; }
-        .login-title { color: #ff4081; text-align: center; font-size: 28px; font-weight: 800; margin-bottom: 30px; text-transform: uppercase; }
-        .login-form { background: white; padding: 35px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
+        .login-container { max-width: 400px; margin: 60px auto; padding: 0 20px; }
+        .login-title { color: #ff4081; text-align: center; font-size: 32px; font-weight: 900; margin-bottom: 30px; text-transform: uppercase; letter-spacing: -1px; }
+        .login-form { background: white; padding: 40px 35px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.07); border: 1px solid #f1f5f9; }
         
-        .form-group { margin-bottom: 20px; }
-        .form-label { display: block; margin-bottom: 8px; font-weight: 700; color: #333; font-size: 0.9rem; }
-        .form-input { width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 15px; transition: all 0.3s; box-sizing: border-box; }
-        .form-input:focus { border-color: #ff4081; outline: none; box-shadow: 0 0 0 4px rgba(255, 64, 129, 0.1); }
+        .form-group { margin-bottom: 25px; }
+        .form-label { display: block; margin-bottom: 10px; font-weight: 800; color: #1e293b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-input { width: 100%; padding: 14px 18px; border: 2px solid #f1f5f9; border-radius: 12px; font-size: 15px; transition: all 0.3s ease; box-sizing: border-box; font-weight: 600; color: #334155; }
+        .form-input:focus { border-color: #ff4081; outline: none; box-shadow: 0 0 0 5px rgba(255, 64, 129, 0.08); background: #fffcfd; }
         
-        .btn-login { width: 100%; padding: 14px; background: linear-gradient(135deg, #ff4081, #ff80ab); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 800; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 64, 129, 0.3); }
+        .btn-login { width: 100%; padding: 16px; background: linear-gradient(135deg, #ff4081, #ff80ab); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; transition: 0.4s; margin-top: 10px; box-shadow: 0 10px 20px rgba(255, 64, 129, 0.2); }
+        .btn-login:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(255, 64, 129, 0.3); }
         
-        .error-message { color: #ef4444; text-align: center; margin-top: 15px; padding: 12px; background: #fef2f2; border-radius: 8px; border: 1px solid #fee2e2; font-size: 0.85rem; font-weight: 600; display: block; }
+        .error-message { color: #e11d48; text-align: center; margin-top: 20px; padding: 15px; background: #fff1f2; border-radius: 12px; border: 1px solid #ffe4e6; font-size: 0.9rem; font-weight: 700; display: block; }
         
-        .register-link { text-align: center; margin-top: 25px; font-size: 0.9rem; color: #666; }
-        .register-link a { color: #ff4081; text-decoration: none; font-weight: 700; }
+        .register-link { text-align: center; margin-top: 30px; font-size: 0.95rem; color: #64748b; font-weight: 600; }
+        .register-link a { color: #ff4081; text-decoration: none; font-weight: 800; margin-left: 5px; }
         .register-link a:hover { text-decoration: underline; }
-        .validator-style { font-size: 0.75rem; color: #ef4444; margin-top: 4px; display: block; }
-          body { cursor: url('https://cur.cursors-4u.net/games/gam-4/gam372.cur'), auto !important; }
+        
+        .validator-style { font-size: 11px; color: #e11d48; margin-top: 6px; font-weight: 700; display: block; }
+        body { cursor: url('https://cur.cursors-4u.net/games/gam-4/gam372.cur'), auto !important; }
     </style>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
     <div class="login-container">
-        <h2 class="login-title">Đăng Nhập</h2>
+        <h2 class="login-title">Chào Mừng Trở Lại</h2>
         <div class="login-form">
             <div class="form-group">
                 <label class="form-label">Tên đăng nhập</label>
-                <asp:TextBox ID="txtUsername" runat="server" CssClass="form-input" placeholder="Nhập tài khoản..." />
+                <asp:TextBox ID="txtUsername" runat="server" CssClass="form-input" placeholder="Nhập tài khoản của bạn..." />
                 <asp:RequiredFieldValidator ID="rfvUser" runat="server" ControlToValidate="txtUsername" 
-                    ErrorMessage="Tên đăng nhập không được để trống" CssClass="validator-style" Display="Dynamic" />
+                    ErrorMessage="* Vui lòng nhập tên đăng nhập" CssClass="validator-style" Display="Dynamic" />
             </div>
             
             <div class="form-group">
-                <label class="form-label">Mật khẩu</label>
-                <asp:TextBox ID="txtPassword" runat="server" TextMode="Password" CssClass="form-input" placeholder="Nhập mật khẩu..." />
+                <label class="form-label">Mật khẩu bảo mật</label>
+                <asp:TextBox ID="txtPassword" runat="server" TextMode="Password" CssClass="form-input" placeholder="••••••••" />
                 <asp:RequiredFieldValidator ID="rfvPass" runat="server" ControlToValidate="txtPassword" 
-                    ErrorMessage="Mật khẩu không được để trống" CssClass="validator-style" Display="Dynamic" />
+                    ErrorMessage="* Vui lòng nhập mật khẩu" CssClass="validator-style" Display="Dynamic" />
             </div>
             
-            <asp:Button ID="btnLogin" runat="server" Text="ĐĂNG NHẬP" CssClass="btn-login" OnClick="btnLogin_Click" />
+            <asp:Button ID="btnLogin" runat="server" Text="ĐĂNG NHẬP NGAY" CssClass="btn-login" OnClick="btnLogin_Click" />
             
             <asp:Label ID="lblMessage" runat="server" CssClass="error-message" Visible="false"></asp:Label>
 
             <div class="register-link">
-                Bạn chưa có tài khoản? 
-                <asp:HyperLink ID="lnkRegister" runat="server" NavigateUrl="~/khach/dangky.aspx">Đăng ký ngay</asp:HyperLink>
+                Bạn là thành viên mới? 
+                <asp:HyperLink ID="lnkRegister" runat="server" NavigateUrl="~/khach/dangky.aspx">Tham gia ngay</asp:HyperLink>
             </div>
         </div>
     </div>

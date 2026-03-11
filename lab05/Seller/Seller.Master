@@ -119,12 +119,15 @@
                 <a href="HoSoSeller.aspx" class="nav-item">
                     <i class="fa-solid fa-user-gear"></i> Hồ sơ người bán
                 </a>
-
+                 <a href="QLTaiKhoan.aspx" class="nav-item">
+                    <i class="fa-solid fa-user"></i> Quản lý tài khoản
+                </a>
                 <div class="nav-divider"></div>
 
                 <a href="../khach/trangchu.aspx" class="nav-item">
                     <i class="fa-solid fa-house-user"></i> Xem trang khách
                 </a>
+                
             </div>
         </div>
 

@@ -2,12 +2,16 @@
 using System.Web;
 using System.Web.UI;
 using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
 using System.Web.UI.WebControls;
 
 namespace lab05
 {
     public partial class Default : System.Web.UI.MasterPage
     {
+        string strCon = ConfigurationManager.ConnectionStrings["BookStoreDB"].ConnectionString;
+
         protected void Page_Load(object sender, EventArgs e)
         {
             UpdateCartCount();
@@ -15,6 +19,17 @@ namespace lab05
             if (!IsPostBack)
             {
                 KiemTraDangNhap();
+
+                string price = Request.QueryString["price"];
+                if (!string.IsNullOrEmpty(price) && price.Contains("-"))
+                {
+                    string[] parts = price.Split('-');
+                    if (parts.Length == 2)
+                    {
+                        txtMinPrice.Text = parts[0];
+                        txtMaxPrice.Text = parts[1];
+                    }
+                }
             }
         }
 
@@ -63,13 +78,10 @@ namespace lab05
                 Response.Redirect("~/khach/trangchu.aspx");
         }
 
-        // HÀM QUAN TRỌNG: Giữ lại MaLoai khi chọn MaCD
         public string GetTopicUrl(object maCD)
         {
             string maLoai = Request.QueryString["MaLoai"];
-            // Nếu không có MaLoai trên URL, mặc định là 1 hoặc bạn có thể xử lý logic khác
             if (string.IsNullOrEmpty(maLoai)) maLoai = "1";
-
             return string.Format("~/khach/danhsach.aspx?MaLoai={0}&MaCD={1}", maLoai, maCD);
         }
 
@@ -83,34 +95,62 @@ namespace lab05
         {
             string min = txtMinPrice.Text.Trim();
             string max = txtMaxPrice.Text.Trim();
-            // Nối chuỗi để hàm GetMasterFilterUrl xử lý
             Response.Redirect(GetMasterFilterUrl("price", min + "-" + max));
         }
 
-        // HÀM XỬ LÝ URL THÔNG MINH: Giữ nguyên các tham số cũ, chỉ cập nhật tham số mới
         public string GetMasterFilterUrl(string paramName, string value)
         {
             var uri = new Uri(Request.Url.AbsoluteUri);
             var query = HttpUtility.ParseQueryString(uri.Query);
 
-            // Cập nhật tham số (Ví dụ: thay đổi sort nhưng vẫn giữ MaLoai, MaCD)
-            query.Set(paramName, value);
+            if (paramName.ToLower() == "page") { query.Set(paramName, value); }
+            else
+            {
+                query.Set(paramName, value);
+                query.Remove("page");
+            }
 
-            // Luôn reset về trang 1 khi thực hiện lọc/sắp xếp mới
-            query.Remove("page");
-
-            string path = Request.Url.AbsolutePath.ToLower().Contains("danhsach")
-                          ? Request.Url.AbsolutePath
-                          : ResolveUrl("~/khach/danhsach.aspx");
-
+            string path = ResolveUrl("~/khach/danhsach.aspx");
             return path + "?" + query.ToString();
         }
 
         protected void BtnLogout_Click(object sender, EventArgs e)
         {
+            if (Session["MaKH"] != null)
+            {
+                UpdateUserStatus(Session["MaKH"].ToString(), 0);
+            }
+
             Session.Clear();
             Session.Abandon();
+
+            if (Request.Cookies["ASP.NET_SessionId"] != null)
+            {
+                Response.Cookies["ASP.NET_SessionId"].Value = string.Empty;
+                Response.Cookies["ASP.NET_SessionId"].Expires = DateTime.Now.AddMonths(-20);
+            }
+
             Response.Redirect("~/khach/trangchu.aspx");
+        }
+
+        private void UpdateUserStatus(string maKH, int status)
+        {
+            try
+            {
+                using (SqlConnection con = new SqlConnection(strCon))
+                {
+                    string sql = "UPDATE KhachHang SET IsOnline = @Status, LastSeen = GETDATE() WHERE MaKH = @ID";
+                    SqlCommand cmd = new SqlCommand(sql, con);
+                    cmd.Parameters.AddWithValue("@Status", status);
+                    cmd.Parameters.AddWithValue("@ID", maKH);
+                    con.Open();
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Loi Logout Status: " + ex.Message);
+            }
         }
     }
 }

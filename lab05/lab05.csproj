@@ -106,6 +106,7 @@
     <Content Include="Images\natgeo_vn.jpg" />
     <Content Include="Images\nghicanx.jpg" />
     <Content Include="Images\nghiencuu_lichsu.jpg" />
+    <Content Include="Images\no-avatar.jpg" />
     <Content Include="Images\onepunchman.jpg" />
     <Content Include="Images\pcworld_ai.jpg" />
     <Content Include="Images\percy_jackson.jpg" />
@@ -179,6 +180,7 @@
     <Content Include="khach\leaderboard.aspx" />
     <Content Include="khach\sanpham-daxem.aspx" />
     <Content Include="khach\thongtin-taikhoan.aspx" />
+    <Content Include="Seller\ChiTietDonHang.aspx" />
     <Content Include="Seller\HoSoSeller.aspx" />
     <Content Include="Seller\QLDanhGia.aspx" />
     <Content Include="Seller\QLDonHang.aspx" />
@@ -263,6 +265,13 @@
       <DependentUpon>thongtin-taikhoan.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Seller\ChiTietDonHang.aspx.cs">
+      <DependentUpon>ChiTietDonHang.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Seller\ChiTietDonHang.aspx.designer.cs">
+      <DependentUpon>ChiTietDonHang.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Seller\HoSoSeller.aspx.cs">
       <DependentUpon>HoSoSeller.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

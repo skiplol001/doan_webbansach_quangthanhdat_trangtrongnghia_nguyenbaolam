@@ -11,76 +11,79 @@ namespace lab05
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!IsPostBack && Session["TenDN"] != null)
-            {
-                Response.Redirect("trangchu.aspx");
-            }
+            // Nếu đã đăng nhập rồi thì về trang chủ luôn
+            if (Session["MaKH"] != null) Response.Redirect("trangchu.aspx");
         }
 
         protected void btnLogin_Click(object sender, EventArgs e)
         {
-            if (!Page.IsValid) return;
-
             string user = txtUsername.Text.Trim();
             string pass = txtPassword.Text.Trim();
 
-            try
+            using (SqlConnection conn = new SqlConnection(strCon))
             {
-                using (SqlConnection conn = new SqlConnection(strCon))
+                // Truy vấn lấy cả ảnh đại diện AnhKH [cite: 2026-03-11]
+                string sql = "SELECT MaKH, HoTenKH, MaRole, AnhKH FROM KhachHang WHERE TenDN=@u AND Matkhau=@p";
+                SqlCommand cmd = new SqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@u", user);
+                cmd.Parameters.AddWithValue("@p", pass);
+
+                conn.Open();
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                if (dr.Read())
                 {
-                    // Lấy thêm cột MaRole để phân quyền
-                    string sql = "SELECT MaKH, HoTenKH, TenDN, MaRole FROM KhachHang WHERE TenDN = @user AND Matkhau = @pass";
-                    SqlCommand cmd = new SqlCommand(sql, conn);
-                    cmd.Parameters.AddWithValue("@user", user);
-                    cmd.Parameters.AddWithValue("@pass", pass);
+                    // 1. LƯU THÔNG TIN CƠ BẢN VÀO SESSION
+                    Session["MaKH"] = dr["MaKH"].ToString();
+                    Session["HoTen"] = dr["HoTenKH"].ToString();
+                    Session["MaRole"] = dr["MaRole"].ToString();
 
-                    conn.Open();
-                    SqlDataReader dr = cmd.ExecuteReader();
-
-                    if (dr.Read())
+                    // 2. LOGIC DỰ PHÒNG ẢNH ĐẠI DIỆN [cite: 2026-03-11]
+                    // Nếu cột AnhKH trống, gán ngay 'no-avatar.jpg' để tránh lỗi load ảnh liên tục
+                    string avatar = dr["AnhKH"].ToString();
+                    if (string.IsNullOrEmpty(avatar))
                     {
-                        // 1. Lưu thông tin cơ bản vào Session
-                        Session["MaKH"] = dr["MaKH"];
-                        Session["HoTen"] = dr["HoTenKH"];
-                        Session["TenDN"] = dr["TenDN"];
-
-                        // Lấy giá trị MaRole (ép kiểu an toàn)
-                        int maRole = 0;
-                        if (dr["MaRole"] != DBNull.Value)
-                        {
-                            maRole = Convert.ToInt32(dr["MaRole"]);
-                        }
-                        Session["MaRole"] = maRole;
-
-                        // 2. Điều hướng dựa trên MaRole
-                        // Giả định: 1 là Người mua, 2 là Người bán
-                        if (maRole == 2)
-                        {
-                            // Nếu là người bán hàng
-                            Response.Redirect("~/Seller/Dashboard.aspx");
-                        }
-                        else
-                        {
-                            // Nếu là người mua hoặc mặc định
-                            Response.Redirect("trangchu.aspx");
-                        }
+                        Session["AnhKH"] = "no-avatar.jpg";
                     }
                     else
                     {
-                        HienLoi("Tài khoản hoặc mật khẩu không chính xác!");
+                        Session["AnhKH"] = avatar;
                     }
+
+                    dr.Close();
+
+                    // 3. CẬP NHẬT TRẠNG THÁI ONLINE
+                    UpdateStatus(Session["MaKH"].ToString(), 1);
+
+                    // 4. CHUYỂN HƯỚNG THEO VAI TRÒ
+                    if (Session["MaRole"].ToString() == "2") // Seller/Admin
+                        Response.Redirect("~/Seller/Dashboard.aspx");
+                    else
+                        Response.Redirect("trangchu.aspx");
                 }
-            }
-            catch (Exception ex)
-            {
-                HienLoi("Lỗi hệ thống: " + ex.Message);
+                else
+                {
+                    lblMessage.Text = "<i class='fa-solid fa-triangle-exclamation'></i> Sai tài khoản hoặc mật khẩu!";
+                    lblMessage.Visible = true;
+                }
             }
         }
 
-        private void HienLoi(string msg)
+        private void UpdateStatus(string maKH, int status)
         {
-            lblMessage.Text = msg;
-            lblMessage.Visible = true;
+            try
+            {
+                using (SqlConnection con = new SqlConnection(strCon))
+                {
+                    string sql = "UPDATE KhachHang SET IsOnline = @s, LastSeen = GETDATE() WHERE MaKH = @id";
+                    SqlCommand cmd = new SqlCommand(sql, con);
+                    cmd.Parameters.AddWithValue("@s", status);
+                    cmd.Parameters.AddWithValue("@id", maKH);
+                    con.Open();
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch { /* Bỏ qua lỗi cập nhật trạng thái để không làm gián đoạn đăng nhập */ }
         }
     }
 }

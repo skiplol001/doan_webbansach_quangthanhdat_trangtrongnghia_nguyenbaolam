@@ -27,19 +27,14 @@ namespace lab05
                 rptCartItems.DataSource = dt;
                 rptCartItems.DataBind();
 
+                // Tính tổng tiền
                 decimal total = 0;
                 foreach (DataRow r in dt.Rows)
                 {
-                    // Kiểm tra DBNull trước khi cộng dồn để tránh lỗi crash
                     if (r["Thanhtien"] != DBNull.Value)
                         total += Convert.ToDecimal(r["Thanhtien"]);
                 }
-
-                // FIX TRIỆT ĐỂ: Chỉ gán nếu Control tồn tại (tránh lỗi Object reference)
-                if (litTongTien != null)
-                {
-                    litTongTien.Text = string.Format("{0:#,##0}", total);
-                }
+                litTongTien.Text = string.Format("{0:#,##0}", total);
             }
             else
             {
@@ -48,35 +43,50 @@ namespace lab05
             }
         }
 
+        // --- HÀM TÍNH TOÁN TỨC THỜI KHI THAY ĐỔI SỐ LƯỢNG [cite: 2026-03-11] ---
+        protected void txtQuantity_TextChanged(object sender, EventArgs e)
+        {
+            TextBox txt = (TextBox)sender;
+            RepeaterItem item = (RepeaterItem)txt.NamingContainer;
+            HiddenField hfMaSach = (HiddenField)item.FindControl("hfMaSach");
+
+            if (hfMaSach != null && Session["Cart"] != null)
+            {
+                DataTable dt = (DataTable)Session["Cart"];
+                string maSach = hfMaSach.Value;
+                int slMoi;
+
+                if (int.TryParse(txt.Text, out slMoi) && slMoi > 0)
+                {
+                    foreach (DataRow r in dt.Rows)
+                    {
+                        if (r["MaSach"].ToString() == maSach)
+                        {
+                            r["Soluong"] = slMoi;
+                            r["Thanhtien"] = slMoi * Convert.ToDecimal(r["Dongia"]);
+                            break;
+                        }
+                    }
+                    Session["Cart"] = dt;
+                    LoadCart(); // Nạp lại để cập nhật số tiền hiển thị [cite: 2026-03-11]
+                }
+                else
+                {
+                    // Nếu nhập sai (nhỏ hơn 1 hoặc chữ), reset về 1
+                    txt.Text = "1";
+                    txtQuantity_TextChanged(sender, e);
+                }
+            }
+        }
+
         protected void rptCartItems_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
             DataTable dt = (DataTable)Session["Cart"];
             if (dt == null) return;
 
-            string maSach = e.CommandArgument.ToString();
-
-            if (e.CommandName == "Update")
+            if (e.CommandName == "Delete")
             {
-                TextBox txt = (TextBox)e.Item.FindControl("txtQuantity");
-                if (txt != null)
-                {
-                    int slMoi;
-                    if (int.TryParse(txt.Text, out slMoi) && slMoi > 0)
-                    {
-                        foreach (DataRow r in dt.Rows)
-                        {
-                            if (r["MaSach"].ToString() == maSach)
-                            {
-                                r["Soluong"] = slMoi;
-                                r["Thanhtien"] = slMoi * Convert.ToDecimal(r["Dongia"]);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            else if (e.CommandName == "Delete")
-            {
+                string maSach = e.CommandArgument.ToString();
                 for (int i = dt.Rows.Count - 1; i >= 0; i--)
                 {
                     if (dt.Rows[i]["MaSach"].ToString() == maSach)
@@ -85,12 +95,12 @@ namespace lab05
                         break;
                     }
                 }
+                Session["Cart"] = dt;
+                LoadCart();
+
+                // Cập nhật số lượng trên Master Page nếu cần
+                Response.Redirect(Request.RawUrl);
             }
-
-            Session["Cart"] = dt;
-
-            // Reload lại trang để cập nhật Badge Giỏ hàng ở Header của Master Page
-            Response.Redirect(Request.RawUrl);
         }
 
         protected void btnClear_Click(object sender, EventArgs e)
@@ -103,8 +113,10 @@ namespace lab05
         {
             if (Session["Cart"] != null && ((DataTable)Session["Cart"]).Rows.Count > 0)
             {
-                // Sau khi nhấn đặt hàng, bạn có thể chuyển sang trang thanhtoan.aspx
-                Response.Redirect("thanhtoan.aspx");
+                if (Session["MaKH"] == null)
+                    Response.Redirect("~/khach/dangnhap.aspx?ReturnUrl=giohang.aspx");
+                else
+                    Response.Redirect("thanhtoan.aspx");
             }
         }
     }

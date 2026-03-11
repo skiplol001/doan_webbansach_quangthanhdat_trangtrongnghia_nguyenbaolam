@@ -24,15 +24,6 @@ namespace lab05
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl hTitle;
 
         /// <summary>
-        /// pnlEmpty control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlEmpty;
-
-        /// <summary>
         /// upList control.
         /// </summary>
         /// <remarks>
@@ -40,6 +31,15 @@ namespace lab05
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.UpdatePanel upList;
+
+        /// <summary>
+        /// pnlEmpty control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlEmpty;
 
         /// <summary>
         /// rptSach control.
@@ -51,6 +51,15 @@ namespace lab05
         protected global::System.Web.UI.WebControls.Repeater rptSach;
 
         /// <summary>
+        /// pnlPagination control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlPagination;
+
+        /// <summary>
         /// lnkFirst control.
         /// </summary>
         /// <remarks>
@@ -60,6 +69,15 @@ namespace lab05
         protected global::System.Web.UI.WebControls.HyperLink lnkFirst;
 
         /// <summary>
+        /// lnkPrev control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HyperLink lnkPrev;
+
+        /// <summary>
         /// rptPagination control.
         /// </summary>
         /// <remarks>
@@ -67,6 +85,15 @@ namespace lab05
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Repeater rptPagination;
+
+        /// <summary>
+        /// lnkNext control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HyperLink lnkNext;
 
         /// <summary>
         /// lnkLast control.

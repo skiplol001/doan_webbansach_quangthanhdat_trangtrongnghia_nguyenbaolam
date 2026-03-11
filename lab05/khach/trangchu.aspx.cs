@@ -136,7 +136,6 @@ namespace lab05
         {
             if (e.CommandName == "ThemGioHang")
             {
-                if (Session["MaKH"] == null) { Response.Redirect("~/khach/dangnhap.aspx"); return; }
                 int maSach = Convert.ToInt32(e.CommandArgument);
                 ThemSachVaoSession(maSach);
                 var myMaster = Master as lab05.Default;

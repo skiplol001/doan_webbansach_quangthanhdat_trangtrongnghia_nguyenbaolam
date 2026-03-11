@@ -60,16 +60,27 @@ namespace lab05
 
             using (SqlConnection conn = new SqlConnection(strCon))
             {
+                // 1. XÂY DỰNG ĐIỀU KIỆN LỌC (WHERE) [cite: 2026-03-11]
                 string where = " WHERE TrangThai = 1";
+
                 if (!string.IsNullOrEmpty(maCD)) where += " AND MaCD = @MaCD";
                 if (!string.IsNullOrEmpty(maLoai)) where += " AND MaCD IN (SELECT MaCD FROM ChuDe WHERE MaLoai = @MaLoai)";
                 if (!string.IsNullOrEmpty(search)) where += " AND TenSach LIKE @Search";
 
-                // Xử lý logic lọc giá
-                if (price == "under100" || price == "0-100") where += " AND Dongia < 100000";
-                else if (price == "100to500" || price == "100-500") where += " AND Dongia BETWEEN 100000 AND 500000";
-                else if (price == "over500") where += " AND Dongia > 500000";
+                // XỬ LÝ LỌC GIÁ
+                if (!string.IsNullOrEmpty(price))
+                {
+                    if (price == "under100") where += " AND Dongia < 100000";
+                    else if (price == "100to500") where += " AND Dongia BETWEEN 100000 AND 500000";
+                    else if (price == "over500") where += " AND Dongia > 500000";
+                    else if (price.Contains("-"))
+                    {
+                        string[] p = price.Split('-');
+                        where += $" AND Dongia BETWEEN {p[0]} AND {p[1]}";
+                    }
+                }
 
+                // 2. XỬ LÝ SẮP XẾP
                 string orderBy = "Ngaycapnhat DESC";
                 if (!string.IsNullOrEmpty(sort))
                 {
@@ -81,12 +92,10 @@ namespace lab05
                     }
                 }
 
+                // 3. LẤY DỮ LIỆU PHÂN TRANG OFFSET-FETCH [cite: 2026-03-11]
                 string sqlData = $@"SELECT * FROM Sach {where} ORDER BY {orderBy} OFFSET @Offset ROWS FETCH NEXT @Limit ROWS ONLY";
                 SqlCommand cmd = new SqlCommand(sqlData, conn);
-
-                if (!string.IsNullOrEmpty(maCD)) cmd.Parameters.AddWithValue("@MaCD", maCD);
-                if (!string.IsNullOrEmpty(maLoai)) cmd.Parameters.AddWithValue("@MaLoai", maLoai);
-                if (!string.IsNullOrEmpty(search)) cmd.Parameters.AddWithValue("@Search", "%" + search + "%");
+                AddSqlParameters(cmd, maCD, maLoai, search);
                 cmd.Parameters.AddWithValue("@Offset", (CurrentPage - 1) * pageSize);
                 cmd.Parameters.AddWithValue("@Limit", pageSize);
 
@@ -96,66 +105,79 @@ namespace lab05
 
                 rptSach.DataSource = dt;
                 rptSach.DataBind();
-                pnlEmpty.Visible = (dt.Rows.Count == 0);
 
+                if (pnlEmpty != null) pnlEmpty.Visible = (dt.Rows.Count == 0);
+
+                // 4. ĐẾM TỔNG SỐ DÒNG ĐỂ CHIA TRANG
                 SqlCommand cmdCount = new SqlCommand($"SELECT COUNT(*) FROM Sach {where}", conn);
-                if (!string.IsNullOrEmpty(maCD)) cmdCount.Parameters.AddWithValue("@MaCD", maCD);
-                if (!string.IsNullOrEmpty(maLoai)) cmdCount.Parameters.AddWithValue("@MaLoai", maLoai);
-                if (!string.IsNullOrEmpty(search)) cmdCount.Parameters.AddWithValue("@Search", "%" + search + "%");
-
+                AddSqlParameters(cmdCount, maCD, maLoai, search);
                 conn.Open();
                 int totalRows = Convert.ToInt32(cmdCount.ExecuteScalar());
                 conn.Close();
 
                 int totalPages = (int)Math.Ceiling((double)totalRows / pageSize);
-                BindPagination(totalPages);
+                BindPaginationUI(totalPages);
             }
         }
 
-        private void BindPagination(int totalPages)
+        private void AddSqlParameters(SqlCommand cmd, string maCD, string maLoai, string search)
         {
-            if (totalPages <= 1) { lnkFirst.Visible = lnkLast.Visible = rptPagination.Visible = false; return; }
-            lnkFirst.Visible = lnkLast.Visible = rptPagination.Visible = true;
+            if (!string.IsNullOrEmpty(maCD)) cmd.Parameters.AddWithValue("@MaCD", maCD);
+            if (!string.IsNullOrEmpty(maLoai)) cmd.Parameters.AddWithValue("@MaLoai", maLoai);
+            if (!string.IsNullOrEmpty(search)) cmd.Parameters.AddWithValue("@Search", "%" + search + "%");
+        }
+
+        // --- 5. LOGIC PHÂN TRANG SLIDING WINDOW (ĐÃ FIX CỰC ĐẸP) [cite: 2026-03-11] ---
+        private void BindPaginationUI(int totalPages)
+        {
+            // Kiểm tra các control để tránh lỗi NullReferenceException
+            if (pnlPagination == null || rptPagination == null) return;
+            if (totalPages <= 1) { pnlPagination.Visible = false; return; }
+            pnlPagination.Visible = true;
+
+            // Thiết lập URL cho các nút điều hướng cơ bản
             lnkFirst.NavigateUrl = GetPageUrl(1);
             lnkLast.NavigateUrl = GetPageUrl(totalPages);
-            List<int> pages = new List<int>();
-            for (int i = 1; i <= totalPages; i++) pages.Add(i);
-            rptPagination.DataSource = pages;
+            lnkPrev.NavigateUrl = GetPageUrl(CurrentPage > 1 ? CurrentPage - 1 : 1);
+            lnkNext.NavigateUrl = GetPageUrl(CurrentPage < totalPages ? CurrentPage + 1 : totalPages);
+
+            // Xử lý trạng thái Disabled cho các nút biên
+            lnkFirst.CssClass = (CurrentPage == 1) ? "page-node page-nav-icon disabled" : "page-node page-nav-icon";
+            lnkPrev.CssClass = (CurrentPage == 1) ? "page-node page-nav-icon disabled" : "page-node page-nav-icon";
+            lnkNext.CssClass = (CurrentPage == totalPages) ? "page-node page-nav-icon disabled" : "page-node page-nav-icon";
+            lnkLast.CssClass = (CurrentPage == totalPages) ? "page-node page-nav-icon disabled" : "page-node page-nav-icon";
+
+            // Thuật toán dải số trượt (Hiển thị tối đa 5 nút) [cite: 2026-03-11]
+            int startPage = Math.Max(1, CurrentPage - 2);
+            int endPage = Math.Min(totalPages, startPage + 4);
+            if (endPage - startPage < 4) startPage = Math.Max(1, endPage - 4);
+
+            var pageNodes = new List<object>();
+            for (int i = startPage; i <= endPage; i++)
+            {
+                pageNodes.Add(new { PageIndex = i, PageText = i.ToString(), IsActive = (i == CurrentPage) });
+            }
+
+            rptPagination.DataSource = pageNodes;
             rptPagination.DataBind();
         }
 
         protected string GetPageUrl(object pageNum)
         {
-            var myMaster = Master as lab05.Default;
-            if (myMaster != null) return myMaster.GetMasterFilterUrl("page", pageNum.ToString());
-            return "danhsach.aspx?page=" + pageNum;
+            var uri = new Uri(Request.Url.AbsoluteUri);
+            var query = HttpUtility.ParseQueryString(uri.Query);
+            query.Set("page", pageNum.ToString());
+            return Request.Path + "?" + query.ToString();
         }
 
         protected void rptSach_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
             if (e.CommandName == "ThemGioHang")
             {
-                // ==========================================
-                // KIỂM TRA ĐĂNG NHẬP TRƯỚC KHI THÊM HÀNG
-                // ==========================================
-                if (Session["MaKH"] == null && Session["HoTen"] == null)
-                {
-                    // Chuyển hướng sang trang đăng nhập trong folder khach
-                    Response.Redirect("~/khach/dangnhap.aspx");
-                    return; // Dừng mọi xử lý thêm vào giỏ hàng
-                }
-
-                // Nếu đã đăng nhập thì tiếp tục logic
                 int maSach = Convert.ToInt32(e.CommandArgument);
                 ThemVaoGio(maSach);
-
                 var myMaster = Master as lab05.Default;
-                if (myMaster != null)
-                {
-                    myMaster.UpdateCartCountAjax();
-                }
-
-                // Hiển thị thông báo Toast phía Client
+                if (myMaster != null) myMaster.UpdateCartCountAjax();
                 ScriptManager.RegisterStartupScript(this, GetType(), "Toast", "showToast();", true);
             }
         }
