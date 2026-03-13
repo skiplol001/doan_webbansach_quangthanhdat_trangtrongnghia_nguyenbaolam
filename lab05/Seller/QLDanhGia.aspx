@@ -18,7 +18,7 @@
         .gv-comments td { padding: 18px 15px; border-bottom: 1px solid #f1f5f9; font-size: 15.5px; vertical-align: middle; color: #334155; }
         .gv-comments tr:hover { background-color: #fcfdff; }
 
-        /* --- STYLE AVATAR TRONG BẢNG QUẢN TRỊ (MỚI) [cite: 2026-03-11] --- */
+        /* STYLE AVATAR NGƯỜI DÙNG [cite: 2026-03-11] */
         .admin-user-info { display: flex; align-items: center; gap: 12px; }
         .admin-comment-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
@@ -30,7 +30,7 @@
         .btn-delete-action { background: #fff1f2; color: #e11d48; padding: 10px 20px; border-radius: 10px; font-size: 12px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s; cursor: pointer; border:none; }
         .btn-delete-action:hover { background: #e11d48; color: white; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(225, 29, 72, 0.2); }
 
-        /* PHÂN TRANG SLIDING WINDOW [cite: 2026-03-11] */
+        /* PHÂN TRANG SLIDING WINDOW */
         .pagination-wrapper { display: flex; justify-content: center; gap: 8px; margin-top: 40px; align-items: center; }
         .page-node { text-decoration: none; padding: 10px 20px; border-radius: 12px; background: white; color: #64748b; font-weight: 800; border: 2px solid #e2e8f0; font-size: 14px; min-width: 50px; text-align: center; transition: 0.3s; }
         .page-node:hover { border-color: var(--seller-primary); color: var(--seller-primary); background: #fff9fc; }
@@ -101,7 +101,7 @@
                             </ItemTemplate>
                         </asp:TemplateField>
 
-                        <%-- FIX: HIỂN THỊ AVATAR NGƯỜI DÙNG THỰC TẾ [cite: 2026-03-11] --%>
+                        <%-- FIX LỖI CẤU TRÚC THẺ DIV TẠI ĐÂY [cite: 2026-03-13] --%>
                         <asp:TemplateField HeaderText="Người gửi">
                             <ItemTemplate>
                                 <div class="admin-user-info">
@@ -144,7 +144,7 @@
                     </EmptyDataTemplate>
                 </asp:GridView>
 
-                <%-- PHÂN TRANG SLIDING WINDOW (ĐÃ ĐỒNG BỘ) [cite: 2026-03-11] --%>
+                <%-- PHÂN TRANG SLIDING WINDOW --%>
                 <div class="pagination-wrapper">
                     <asp:HyperLink ID="lnkFirst" runat="server" CssClass="page-nav"><i class="fa-solid fa-angles-left"></i></asp:HyperLink>
                     <asp:HyperLink ID="lnkPrev" runat="server" CssClass="page-nav"><i class="fa-solid fa-chevron-left"></i></asp:HyperLink>

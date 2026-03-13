@@ -21,16 +21,15 @@ namespace lab05.Admin
             if (!IsPostBack) LoadComments();
         }
 
-        // --- FIX: SQL JOIN LẤY AnhKH NGƯỜI DÙNG [cite: 2026-03-11] ---
         private void LoadComments()
         {
             using (SqlConnection conn = new SqlConnection(strCon))
             {
-                // Truy vấn JOIN 3 bảng: Comment, Sach, KhachHang
+                // FIX: Sử dụng LEFT JOIN để không bị mất dữ liệu nếu Khách hàng hoặc Sách bị lỗi [cite: 2026-03-13]
                 string sql = $@"SELECT C.*, S.TenSach, K.HoTenKH, K.AnhKH 
                                FROM Comment C 
-                               JOIN Sach S ON C.MaSach = S.MaSach 
-                               JOIN KhachHang K ON C.MaKH = K.MaKH 
+                               LEFT JOIN Sach S ON C.MaSach = S.MaSach 
+                               LEFT JOIN KhachHang K ON C.MaKH = K.MaKH 
                                ORDER BY C.NgayBL DESC 
                                OFFSET @Offset ROWS FETCH NEXT @Limit ROWS ONLY";
 
@@ -41,6 +40,7 @@ namespace lab05.Admin
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
+
                 gvComments.DataSource = dt;
                 gvComments.DataBind();
 
@@ -56,6 +56,7 @@ namespace lab05.Admin
 
         public string RenderStars(object starCount)
         {
+            if (starCount == null || starCount == DBNull.Value) return "";
             int stars = Convert.ToInt32(starCount);
             string html = "";
             for (int i = 1; i <= 5; i++)
@@ -63,11 +64,11 @@ namespace lab05.Admin
             return html;
         }
 
-        // --- PHÂN TRANG SLIDING WINDOW (ĐÃ FIX) [cite: 2026-03-11] ---
         private void BindPaginationUI(int totalPages)
         {
-            if (totalPages <= 1) { lnkFirst.Parent.Visible = false; return; }
-            lnkFirst.Parent.Visible = true;
+            if (totalPages <= 1) { lnkFirst.Visible = lnkLast.Visible = lnkPrev.Visible = lnkNext.Visible = rptPaging.Visible = false; return; }
+
+            lnkFirst.Visible = lnkLast.Visible = lnkPrev.Visible = lnkNext.Visible = rptPaging.Visible = true;
 
             lnkFirst.NavigateUrl = GetPageUrl(1);
             lnkLast.NavigateUrl = GetPageUrl(totalPages);
@@ -79,6 +80,7 @@ namespace lab05.Admin
             lnkNext.CssClass = (CurrentPage == totalPages) ? "page-nav disabled" : "page-nav";
             lnkLast.CssClass = (CurrentPage == totalPages) ? "page-nav disabled" : "page-nav";
 
+            // Thuật toán trượt 5 nút [cite: 2026-03-11]
             int start = Math.Max(1, CurrentPage - 2);
             int end = Math.Min(totalPages, start + 4);
             if (end - start < 4) start = Math.Max(1, end - 4);
@@ -100,6 +102,8 @@ namespace lab05.Admin
 
         protected void btnConfirmDelete_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(hfDeleteID.Value)) return;
+
             int maBL = Convert.ToInt32(hfDeleteID.Value);
             using (SqlConnection conn = new SqlConnection(strCon))
             {
