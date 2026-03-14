@@ -25,14 +25,13 @@ namespace lab05.Seller
 
         private void LoadSachData()
         {
-            // 1. Lấy trang hiện tại và từ khóa tìm kiếm [cite: 2026-03-11]
             int currentPage = 1;
             if (Request.QueryString["page"] != null) int.TryParse(Request.QueryString["page"], out currentPage);
             string keyword = txtSearch.Text.Trim();
 
             using (SqlConnection conn = new SqlConnection(strCon))
             {
-                // 2. Đếm tổng số bản ghi để tính số trang
+                // Đếm tổng số bản ghi
                 string countSql = "SELECT COUNT(*) FROM Sach WHERE TenSach LIKE @key";
                 SqlCommand cmdCount = new SqlCommand(countSql, conn);
                 cmdCount.Parameters.AddWithValue("@key", "%" + keyword + "%");
@@ -41,7 +40,7 @@ namespace lab05.Seller
                 int totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
                 conn.Close();
 
-                // 3. Lấy dữ liệu phân trang (Sử dụng OFFSET FETCH) [cite: 2026-03-11]
+                // Lấy toàn bộ cột (bao gồm Soluongton) [cite: 2026-03-14]
                 string sql = @"SELECT * FROM Sach WHERE TenSach LIKE @key 
                                ORDER BY Ngaycapnhat DESC 
                                OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY";
@@ -56,7 +55,6 @@ namespace lab05.Seller
                 gvSach.DataSource = dt;
                 gvSach.DataBind();
 
-                // 4. Tạo dải số phân trang Sliding Window (5 nút)
                 CreatePagingUI(currentPage, totalPages);
             }
         }
@@ -66,13 +64,11 @@ namespace lab05.Seller
             if (total <= 1) { lnkFirst.Visible = lnkLast.Visible = lnkPrev.Visible = lnkNext.Visible = rptPaging.Visible = false; return; }
             rptPaging.Visible = true;
 
-            // Thiết lập URL cho các nút điều hướng đầu cuối
             lnkFirst.NavigateUrl = GetPageUrl(1);
             lnkLast.NavigateUrl = GetPageUrl(total);
             lnkPrev.NavigateUrl = GetPageUrl(current > 1 ? current - 1 : 1);
             lnkNext.NavigateUrl = GetPageUrl(current < total ? current + 1 : total);
 
-            // Thuật toán Sliding: Nút hiện tại luôn cố gắng ở giữa dải 5 nút [cite: 2026-03-11]
             int startPage = Math.Max(1, current - 2);
             int endPage = Math.Min(total, startPage + 4);
             if (endPage - startPage < 4) startPage = Math.Max(1, endPage - 4);
@@ -87,15 +83,14 @@ namespace lab05.Seller
             rptPaging.DataBind();
         }
 
-        // Hàm tạo URL để giữ lại từ khóa tìm kiếm khi chuyển trang [cite: 2026-03-11]
         public string GetPageUrl(object pageIndex)
         {
+            // Bảo toàn từ khóa tìm kiếm khi chuyển trang [cite: 2026-03-11]
             return $"QLSach.aspx?page={pageIndex}&search={Server.UrlEncode(txtSearch.Text)}";
         }
 
         protected void btnSearch_Click(object sender, EventArgs e)
         {
-            // Tìm kiếm mới thì quay về trang 1
             Response.Redirect(GetPageUrl(1));
         }
 
@@ -107,7 +102,16 @@ namespace lab05.Seller
                 SqlCommand cmd = new SqlCommand("DELETE FROM Sach WHERE MaSach=@id", conn);
                 cmd.Parameters.AddWithValue("@id", id);
                 conn.Open();
-                cmd.ExecuteNonQuery();
+                try
+                {
+                    cmd.ExecuteNonQuery();
+                }
+                catch
+                {
+                    // Nếu sách đã được mua (có trong CTDatHang) thì không cho xóa
+                    ScriptManager.RegisterStartupScript(this, GetType(), "alert", "alert('Không thể xóa sách này vì đã có dữ liệu đơn hàng liên quan!');", true);
+                }
+                conn.Close();
                 LoadSachData();
             }
         }

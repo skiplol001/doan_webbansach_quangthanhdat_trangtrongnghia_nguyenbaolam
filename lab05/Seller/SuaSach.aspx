@@ -13,7 +13,6 @@
         .form-group { margin-bottom: 25px; }
         .form-label { display: block; margin-bottom: 10px; font-weight: 700; color: #475569; font-size: 13px; text-transform: uppercase; }
         
-        /* Input & Dropdown lớn hơn */
         .form-control { width: 100%; padding: 12px 18px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 15px; transition: 0.3s; box-sizing: border-box; color: #334155; }
         .form-control:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
         
@@ -36,7 +35,7 @@
         
         <div class="form-group">
             <label class="form-label">Tên tiêu đề sách (*)</label>
-            <asp:TextBox ID="txtTenSach" runat="server" CssClass="form-control"></asp:TextBox>
+            <asp:TextBox ID="txtTenSach" runat="server" CssClass="form-control" placeholder="Nhập tên sách..."></asp:TextBox>
         </div>
 
         <div class="grid-row">
@@ -50,26 +49,32 @@
             </div>
         </div>
 
+        <%-- CẬP NHẬT: GỘP GIÁ VÀ SỐ LƯỢNG VÀO 1 HÀNG [cite: 2026-03-14] --%>
         <div class="grid-row">
             <div class="form-group">
                 <label class="form-label">Giá niêm yết (VNĐ) (*)</label>
                 <asp:TextBox ID="txtGia" runat="server" CssClass="form-control" TextMode="Number"></asp:TextBox>
             </div>
             <div class="form-group">
-                <label class="form-label">Quản lý hình ảnh</label>
-                <div class="img-preview-box">
-                    <asp:Image ID="imgHienTai" runat="server" CssClass="img-thumb" />
-                    <div>
-                        <p style="font-size:12px; color:#94a3b8; margin-bottom:8px;">Thay đổi ảnh bìa mới:</p>
-                        <asp:FileUpload ID="fuAnh" runat="server" CssClass="form-control" style="padding: 8px;" />
-                    </div>
+                <label class="form-label">Số lượng tồn kho (*)</label>
+                <asp:TextBox ID="txtSoLuong" runat="server" CssClass="form-control" TextMode="Number" placeholder="Nhập số lượng..."></asp:TextBox>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Quản lý hình ảnh</label>
+            <div class="img-preview-box">
+                <asp:Image ID="imgHienTai" runat="server" CssClass="img-thumb" />
+                <div>
+                    <p style="font-size:12px; color:#94a3b8; margin-bottom:8px;">Bạn có muốn thay đổi ảnh bìa không?</p>
+                    <asp:FileUpload ID="fuAnh" runat="server" CssClass="form-control" style="padding: 8px; font-size: 11px;" />
                 </div>
             </div>
         </div>
 
         <div class="form-group">
             <label class="form-label">Tóm tắt nội dung</label>
-            <asp:TextBox ID="txtMoTa" runat="server" TextMode="MultiLine" Rows="5" CssClass="form-control"></asp:TextBox>
+            <asp:TextBox ID="txtMoTa" runat="server" TextMode="MultiLine" Rows="5" CssClass="form-control" placeholder="Nhập mô tả chi tiết..."></asp:TextBox>
         </div>
 
         <asp:Button ID="btnCapNhat" runat="server" Text="LƯU THAY ĐỔI" CssClass="btn-update" OnClick="btnCapNhat_Click" />

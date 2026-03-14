@@ -2,7 +2,7 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <style>
-        :root { --primary-blue: #3b82f6; --success: #10b981; }
+        :root { --primary-blue: #3b82f6; --success: #10b981; --danger: #ef4444; }
         
         /* TINH CHỈNH COMPACT NHỎ LẠI 20% [cite: 2026-03-11] */
         body { font-size: 11.5px; }
@@ -23,7 +23,11 @@
         .table-mini th { text-align: left; padding: 8px 10px; background: #f8fafc; color: #64748b; font-size: 8.5px; text-transform: uppercase; border-bottom: 2px solid #edf2f7; }
         .table-mini td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; color: #1e293b; font-size: 11.5px; }
 
-        /* PHÂN TRANG REPEATER: TRƯỢT SỐ TRUNG TÂM [cite: 2026-03-11] */
+        /* MỚI: Cảnh báo hết hàng [cite: 2026-03-14] */
+        .stock-low { color: var(--danger); font-weight: 800; }
+        .stock-ok { color: #64748b; font-weight: 600; }
+
+        /* PHÂN TRANG REPEATER: TRƯỢT SỐ TRUNG TÂM */
         .pagination-wrapper { display: flex; justify-content: center; gap: 4px; margin-top: 15px; align-items: center; }
         .page-node { 
             text-decoration: none; padding: 4px 10px; border-radius: 6px; background: white; 
@@ -33,7 +37,6 @@
         .page-node:hover { background: #f8fafc; color: var(--primary-blue); border-color: var(--primary-blue); }
         .page-node.active { background: var(--primary-blue); color: white; border-color: var(--primary-blue); box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2); }
         .page-nav { color: #cbd5e1; font-size: 1.1rem; padding: 0 5px; transition: 0.3s; }
-        .page-nav:hover { color: var(--primary-blue); }
     </style>
 </asp:Content>
 
@@ -45,7 +48,7 @@
                 <h2>QUẢN LÝ <span style="color:var(--primary-blue);">KHO SÁCH</span></h2>
                 
                 <div class="search-box">
-                    <asp:TextBox ID="txtSearch" runat="server" placeholder="Tìm kiếm..." CssClass="search-input" AutoPostBack="true" OnTextChanged="btnSearch_Click"></asp:TextBox>
+                    <asp:TextBox ID="txtSearch" runat="server" placeholder="Tìm kiếm tên sách..." CssClass="search-input" AutoPostBack="true" OnTextChanged="btnSearch_Click"></asp:TextBox>
                     <asp:LinkButton ID="btnSearch" runat="server" CssClass="btn-search" OnClick="btnSearch_Click">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </asp:LinkButton>
@@ -65,32 +68,47 @@
                                 <img src='<%# Page.ResolveUrl("~/Images/" + Eval("AnhBia")) %>' class="img-thumb" />
                             </ItemTemplate>
                         </asp:TemplateField>
-                        <asp:BoundField DataField="TenSach" HeaderText="Tên sách" ItemStyle-Font-Bold="true" />
-                        <asp:TemplateField HeaderText="Giá bán">
+
+                        <asp:BoundField DataField="TenSach" HeaderText="Tiêu đề sách" ItemStyle-Font-Bold="true" />
+                        
+                        <asp:TemplateField HeaderText="Giá niêm yết">
                             <ItemTemplate>
-                                <b style="color:#ef4444;"><%# string.Format("{0:#,##0}", Eval("Dongia")) %>đ</b>
+                                <b style="color:var(--danger);"><%# string.Format("{0:#,##0}", Eval("Dongia")) %>đ</b>
                             </ItemTemplate>
                         </asp:TemplateField>
-                        <asp:BoundField DataField="Ngaycapnhat" HeaderText="Cập nhật" DataFormatString="{0:dd/MM/yy}" ItemStyle-ForeColor="#94a3b8" />
-                        <asp:TemplateField HeaderText="Lệnh">
+
+                        <%-- MỚI: HIỂN THỊ SỐ LƯỢNG TỒN KHO [cite: 2026-03-14] --%>
+                        <asp:TemplateField HeaderText="Số lượng">
                             <ItemTemplate>
-                                <div style="display:flex; gap:8px;">
+                                <span class='<%# Convert.ToInt32(Eval("Soluongton")) < 5 ? "stock-low" : "stock-ok" %>'>
+                                    <i class="fa-solid fa-boxes-stacked"></i> <%# Eval("Soluongton") %>
+                                </span>
+                            </ItemTemplate>
+                        </asp:TemplateField>
+
+                        <asp:BoundField DataField="Ngaycapnhat" HeaderText="Cập nhật" DataFormatString="{0:dd/MM/yy}" ItemStyle-ForeColor="#94a3b8" />
+
+                        <asp:TemplateField HeaderText="Công cụ">
+                            <ItemTemplate>
+                                <div style="display:flex; gap:10px;">
                                     <asp:HyperLink ID="lnkEdit" runat="server" NavigateUrl='<%# "SuaSach.aspx?id=" + Eval("MaSach") %>' style="color:var(--primary-blue); font-size:14px;"><i class="fa-solid fa-pen-to-square"></i></asp:HyperLink>
-                                    <asp:LinkButton ID="btnDelete" runat="server" CommandName="Delete" style="color:#ef4444; font-size:14px;" OnClientClick="return confirm('Xóa?');"><i class="fa-solid fa-trash-can"></i></asp:LinkButton>
+                                    <asp:LinkButton ID="btnDelete" runat="server" CommandName="Delete" style="color:var(--danger); font-size:14px;" OnClientClick="return confirm('Xác nhận xóa quyển sách này khỏi hệ thống?');"><i class="fa-solid fa-trash-can"></i></asp:LinkButton>
                                 </div>
                             </ItemTemplate>
                         </asp:TemplateField>
                     </Columns>
+                    <EmptyDataTemplate>
+                        <div style="text-align:center; padding:30px; color:#94a3b8;">Không tìm thấy sách nào trong kho.</div>
+                    </EmptyDataTemplate>
                 </asp:GridView>
 
-                <%-- PHẦN PHÂN TRANG COPY TỪ TRANG CHỦ THEO YÊU CẦU [cite: 2026-03-11] --%>
+                <%-- PHÂN TRANG --%>
                 <div class="pagination-wrapper">
                     <asp:HyperLink ID="lnkFirst" runat="server" CssClass="page-nav" ToolTip="Trang đầu"><i class="fa-solid fa-angles-left"></i></asp:HyperLink>
                     <asp:HyperLink ID="lnkPrev" runat="server" CssClass="page-nav"><i class="fa-solid fa-angle-left"></i></asp:HyperLink>
                     
                     <asp:Repeater ID="rptPaging" runat="server">
                         <ItemTemplate>
-                            <%-- NavigateUrl sẽ được xử lý trong Code Behind để giữ lại từ khóa tìm kiếm --%>
                             <asp:HyperLink ID="lnkPage" runat="server" 
                                 NavigateUrl='<%# GetPageUrl(Eval("PageIndex")) %>'
                                 Text='<%# Eval("PageText") %>'

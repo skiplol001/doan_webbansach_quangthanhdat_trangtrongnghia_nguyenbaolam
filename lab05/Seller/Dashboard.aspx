@@ -1,9 +1,7 @@
 ﻿<%@ Page Title="Thống kê doanh thu" Language="C#" MasterPageFile="~/Seller/Seller.Master" AutoEventWireup="true" CodeBehind="Dashboard.aspx.cs" Inherits="lab05.Admin.Dashboard" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <%-- Nhúng thư viện biểu đồ Chart.js --%>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <style>
         :root { --seller-primary: #ff4081; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
@@ -18,26 +16,24 @@
         .bg-purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
 
         .dashboard-main { display: grid; grid-template-columns: 1.5fr 1fr; gap: 25px; }
-        .chart-container { background: white; padding: 25px; border-radius: 20px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .recent-table { background: white; padding: 25px; border-radius: 20px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .chart-container, .recent-table { background: white; padding: 25px; border-radius: 20px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         
         .table-title { font-size: 16px; font-weight: 800; margin-bottom: 20px; color: #1e293b; display: flex; align-items: center; gap: 10px; text-transform: uppercase; }
         .table-custom { width: 100%; border-collapse: collapse; }
         .table-custom th { text-align: left; padding: 12px; border-bottom: 2px solid #f8fafc; color: #94a3b8; font-size: 11px; }
         .table-custom td { padding: 15px 12px; border-bottom: 1px solid #f8fafc; color: #334155; font-size: 13px; }
 
-        @media (max-width: 1024px) {
-            .dashboard-main { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 1024px) { .dashboard-main { grid-template-columns: 1fr; } }
     </style>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
     <div style="display:flex; align-items:center; gap:10px; margin-bottom: 25px;">
         <i class="fa-solid fa-chart-line" style="color:var(--seller-primary); font-size: 1.5rem;"></i>
-        <h2 style="margin:0; font-weight:900;">BÁO CÁO <span>DOANH THU</span></h2>
+        <h2 style="margin:0; font-weight:900;">BÁO CÁO <span>HỆ THỐNG</span></h2>
     </div>
     
+    <%-- THỐNG KÊ TỔNG QUAN --%>
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon bg-blue"><i class="fa-solid fa-coins"></i></div>
@@ -56,31 +52,30 @@
         <div class="stat-card">
             <div class="stat-icon bg-purple"><i class="fa-solid fa-book"></i></div>
             <div class="stat-info">
-                <h3>Sản phẩm</h3>
+                <h3>Sản phẩm kho</h3>
                 <p><asp:Literal ID="litBooks" runat="server" Text="0"></asp:Literal></p>
             </div>
         </div>
     </div>
 
     <div class="dashboard-main">
-        <%-- KHU VỰC BIỂU ĐỒ --%>
+        <%-- BIỂU ĐỒ --%>
         <div class="chart-container">
-            <div class="table-title"><i class="fa-solid fa-chart-area"></i> Biểu đồ tăng trưởng 7 ngày qua</div>
-            <div style="height: 300px;">
+            <div class="table-title"><i class="fa-solid fa-chart-area"></i> Biểu đồ doanh thu 7 ngày qua</div>
+            <div style="height: 350px;">
                 <canvas id="revenueChart"></canvas>
             </div>
         </div>
 
-        <%-- KHU VỰC BẢNG ĐƠN HÀNG --%>
+        <%-- DANH SÁCH GIAO DỊCH GẦN NHẤT --%>
         <div class="recent-table">
             <div class="table-title"><i class="fa-solid fa-receipt"></i> Giao dịch gần nhất</div>
-            <asp:GridView ID="gvRecentOrders" runat="server" AutoGenerateColumns="False" 
-                CssClass="table-custom" GridLines="None">
+            <asp:GridView ID="gvRecentOrders" runat="server" AutoGenerateColumns="False" CssClass="table-custom" GridLines="None">
                 <Columns>
                     <asp:BoundField DataField="SoDH" HeaderText="MÃ" />
-                    <asp:BoundField DataField="HoTenKH" HeaderText="KHÁCH" />
+                    <asp:BoundField DataField="HoTenKH" HeaderText="KHÁCH HÀNG" />
                     <asp:BoundField DataField="Trigia" HeaderText="GIÁ TRỊ" DataFormatString="{0:#,##0}đ" ItemStyle-Font-Bold="true" />
-                    <asp:TemplateField HeaderText="STT">
+                    <asp:TemplateField HeaderText="TRẠNG THÁI">
                         <ItemTemplate>
                             <%# (bool)Eval("Dagiao") ? 
                                 "<span style='color:#10b981;'><i class='fa-solid fa-circle-check'></i></span>" : 
@@ -92,23 +87,24 @@
         </div>
     </div>
 
-    <%-- SCRIPT VẼ BIỂU ĐỒ --%>
     <script>
         const ctx = document.getElementById('revenueChart').getContext('2d');
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: [<%= ChartLabels %>], // Dữ liệu ngày nạp từ Code Behind
+                labels: [<%= ChartLabels %>], 
                 datasets: [{
-                    label: 'Doanh thu thực tế (đ)',
-                    data: [<%= ChartData %>], // Dữ liệu tiền nạp từ Code Behind
+                    label: 'Doanh thu',
+                    data: [<%= ChartData %>],
                     borderColor: '#ff4081',
                     backgroundColor: 'rgba(255, 64, 129, 0.1)',
                     borderWidth: 3,
                     fill: true,
                     tension: 0.4,
                     pointRadius: 5,
-                    pointBackgroundColor: '#ff4081'
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#ff4081',
+                    pointBorderWidth: 2
                 }]
             },
             options: {
@@ -116,8 +112,8 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
-                    x: { grid: { display: false } }
+                    y: { beginAtZero: true, ticks: { font: { size: 11 } } },
+                    x: { ticks: { font: { size: 11 } }, grid: { display: false } }
                 }
             }
         });

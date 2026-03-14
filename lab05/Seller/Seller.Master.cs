@@ -8,38 +8,25 @@ namespace lab05.Admin
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            // 1. Kiểm tra đăng nhập
-            if (Session["MaKH"] == null)
-            {
-                Response.Redirect("~/khach/dangnhap.aspx");
-                return;
-            }
-
-            // 2. Bảo mật: Chỉ cho phép tài khoản có MaRole = 2 (Seller) truy cập
-            if (Session["MaRole"] == null || Session["MaRole"].ToString() != "2")
-            {
-                // Nếu là khách thường, đuổi về trang chủ khách
-                Response.Redirect("~/khach/trangchu.aspx");
-                return;
-            }
-
-            // 3. Hiển thị tên người bán lên Topbar
             if (!IsPostBack)
             {
+                // Kiểm tra tên người dùng từ Session
                 if (Session["HoTen"] != null)
                 {
                     litSellerName.Text = Session["HoTen"].ToString();
                 }
+                else if (Session["TenDN"] != null)
+                {
+                    litSellerName.Text = Session["TenDN"].ToString();
+                }
             }
         }
 
-        /// <summary>
-        /// Xử lý đăng xuất cho người bán
-        /// </summary>
+        // --- XỬ LÝ ĐĂNG XUẤT [cite: 2026-03-14] ---
         protected void btnLogout_Click(object sender, EventArgs e)
         {
             // Xóa sạch Session
-            Session.RemoveAll();
+            Session.Clear();
             Session.Abandon();
 
             // Xóa Cookie nếu có
@@ -49,8 +36,8 @@ namespace lab05.Admin
                 Response.Cookies["ASP.NET_SessionId"].Expires = DateTime.Now.AddMonths(-20);
             }
 
-            // Điều hướng về trang đăng nhập
-            Response.Redirect("~/khach/dangnhap.aspx");
+            // Chuyển hướng về trang chủ khách
+            Response.Redirect("~/khach/trangchu.aspx");
         }
     }
 }

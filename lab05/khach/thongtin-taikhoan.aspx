@@ -28,6 +28,12 @@
         .btn-save-profile { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 16px; font-weight: 900; width: 100%; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(255, 64, 129, 0.2); text-transform: uppercase; letter-spacing: 1px; }
         .btn-save-profile:hover { transform: translateY(-3px); background: var(--primary-hover); box-shadow: 0 15px 30px rgba(255, 64, 129, 0.3); }
 
+        /* --- MỚI: STYLE CHO PHẦN ĐỔI MẬT KHẨU [cite: 2026-03-14] --- */
+        .password-section { margin-top: 30px; padding-top: 25px; border-top: 2px dashed #f1f5f9; }
+        .btn-toggle-pass { background: #f8fafc; color: #64748b; border: 2px solid #e2e8f0; padding: 12px; border-radius: 12px; width: 100%; font-weight: 800; font-size: 12px; cursor: pointer; transition: 0.3s; margin-bottom: 20px; }
+        .btn-toggle-pass:hover { background: #fff; border-color: var(--primary); color: var(--primary); }
+        .change-pass-box { background: #fffcfd; padding: 20px; border-radius: 18px; border: 1px solid #ffeff7; }
+
         /* --- LỊCH SỬ MUA HÀNG --- */
         .order-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
         .order-table th { text-align: left; padding: 15px 20px; color: #64748b; font-size: 11px; font-weight: 800; text-transform: uppercase; }
@@ -56,7 +62,7 @@
             <div class="avatar-section">
                 <asp:Image ID="imgKH" runat="server" CssClass="avatar-img" ImageUrl="~/Images/no-avatar.jpg" />
                 <div class="upload-btn-wrapper">
-                    <button class="btn-upload"><i class="fa-solid fa-camera"></i> Đổi ảnh đại diện</button>
+                    <button class="btn-upload" type="button"><i class="fa-solid fa-camera"></i> Đổi ảnh đại diện</button>
                     <asp:FileUpload ID="fuAvatar" runat="server" onchange="this.form.submit()" />
                 </div>
             </div>
@@ -87,6 +93,27 @@
             </div>
 
             <asp:Button ID="btnUpdate" runat="server" Text="LƯU THÔNG TIN" CssClass="btn-save-profile" OnClick="btnUpdate_Click" />
+
+            <%-- MỚI: KHU VỰC ĐỔI MẬT KHẨU [cite: 2026-03-14] --%>
+            <div class="password-section">
+                <asp:Button ID="btnTogglePass" runat="server" Text="🛡️ THAY ĐỔI MẬT KHẨU" CssClass="btn-toggle-pass" OnClick="btnTogglePass_Click" />
+                
+                <asp:Panel ID="pnlChangePass" runat="server" Visible="false" CssClass="change-pass-box">
+                    <div class="form-group">
+                        <label class="form-label">Mật khẩu hiện tại</label>
+                        <asp:TextBox ID="txtOldPass" runat="server" CssClass="form-control-edit" TextMode="Password"></asp:TextBox>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Mật khẩu mới</label>
+                        <asp:TextBox ID="txtNewPass" runat="server" CssClass="form-control-edit" TextMode="Password"></asp:TextBox>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Xác nhận mật khẩu mới</label>
+                        <asp:TextBox ID="txtConfirmPass" runat="server" CssClass="form-control-edit" TextMode="Password"></asp:TextBox>
+                    </div>
+                    <asp:Button ID="btnConfirmChangePass" runat="server" Text="CẬP NHẬT MẬT KHẨU" CssClass="btn-save-profile" style="font-size:12px; padding:12px;" OnClick="btnConfirmChangePass_Click" />
+                </asp:Panel>
+            </div>
         </aside>
 
         <%-- PHẦN 2: LỊCH SỬ MUA HÀNG --%>

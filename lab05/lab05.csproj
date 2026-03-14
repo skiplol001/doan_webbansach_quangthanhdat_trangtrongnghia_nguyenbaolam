@@ -183,6 +183,7 @@
     <Content Include="Seller\ChiTietDonHang.aspx" />
     <Content Include="Seller\HoSoSeller.aspx" />
     <Content Include="Seller\QLDanhGia.aspx" />
+    <Content Include="Seller\QLDanhMuc.aspx" />
     <Content Include="Seller\QLDonHang.aspx" />
     <Content Include="Seller\Dashboard.aspx" />
     <Content Include="Seller\QLSach.aspx" />
@@ -285,6 +286,13 @@
     </Compile>
     <Compile Include="Seller\QLDanhGia.aspx.designer.cs">
       <DependentUpon>QLDanhGia.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Seller\QLDanhMuc.aspx.cs">
+      <DependentUpon>QLDanhMuc.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Seller\QLDanhMuc.aspx.designer.cs">
+      <DependentUpon>QLDanhMuc.aspx</DependentUpon>
     </Compile>
     <Compile Include="Seller\QLDonHang.aspx.cs">
       <DependentUpon>QLDonHang.aspx</DependentUpon>

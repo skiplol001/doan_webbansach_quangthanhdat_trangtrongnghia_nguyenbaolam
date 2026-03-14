@@ -51,6 +51,15 @@ namespace lab05.Seller
         protected global::System.Web.UI.WebControls.TextBox txtGia;
 
         /// <summary>
+        /// txtSoLuong control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtSoLuong;
+
+        /// <summary>
         /// imgHienTai control.
         /// </summary>
         /// <remarks>

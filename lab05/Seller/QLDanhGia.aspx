@@ -2,7 +2,7 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <style>
-        :root { --seller-primary: #ff4081; --star-gold: #f59e0b; --bg-main: #f8fafc; }
+        :root { --seller-primary: #ff4081; --star-gold: #f59e0b; --bg-main: #f8fafc; --indigo: #6366f1; }
 
         /* PHÓNG TO GIAO DIỆN 120% [cite: 2026-03-11] */
         body { font-size: 14.5px; background-color: var(--bg-main); } 
@@ -23,12 +23,15 @@
         .admin-comment-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
         .star-rating { color: var(--star-gold); font-size: 14px; letter-spacing: 2px; }
-        .book-link { color: #6366f1; font-weight: 800; text-decoration: none; border-bottom: 1px dashed transparent; transition: 0.3s; }
-        .book-link:hover { border-bottom-color: #6366f1; }
-        .comment-text { color: #64748b; font-style: italic; line-height: 1.6; max-width: 500px; }
+        .book-link-title { color: #1e293b; font-weight: 800; text-decoration: none; }
+        .comment-text { color: #64748b; font-style: italic; line-height: 1.6; max-width: 400px; }
 
-        .btn-delete-action { background: #fff1f2; color: #e11d48; padding: 10px 20px; border-radius: 10px; font-size: 12px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s; cursor: pointer; border:none; }
-        .btn-delete-action:hover { background: #e11d48; color: white; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(225, 29, 72, 0.2); }
+        /* MỚI: STYLE NÚT CHI TIẾT TRANG KHÁCH [cite: 2026-03-14] */
+        .btn-view-detail { background: #eef2ff; color: var(--indigo); padding: 8px 15px; border-radius: 8px; font-size: 11px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: 0.3s; border: 1px solid #e0e7ff; }
+        .btn-view-detail:hover { background: var(--indigo); color: white; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2); }
+
+        .btn-delete-action { background: #fff1f2; color: #e11d48; padding: 10px 15px; border-radius: 10px; font-size: 11px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s; cursor: pointer; border:none; }
+        .btn-delete-action:hover { background: #e11d48; color: white; transform: translateY(-3px); }
 
         /* PHÂN TRANG SLIDING WINDOW */
         .pagination-wrapper { display: flex; justify-content: center; gap: 8px; margin-top: 40px; align-items: center; }
@@ -36,16 +39,13 @@
         .page-node:hover { border-color: var(--seller-primary); color: var(--seller-primary); background: #fff9fc; }
         .page-node.active { background: var(--seller-primary); color: white; border-color: var(--seller-primary); box-shadow: 0 8px 20px rgba(255, 64, 129, 0.3); }
         .page-nav { color: #cbd5e1; font-size: 1.5rem; padding: 0 12px; transition: 0.3s; text-decoration: none; }
-        .page-nav:hover:not(.disabled) { color: var(--seller-primary); }
-        .disabled { opacity: 0.3; pointer-events: none; }
-
-        /* Modal & Toast */
-        #toastBox { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); color: #fff; padding: 20px 45px; border-radius: 50px; z-index: 10000; display: flex; align-items: center; gap: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); font-weight: 600; }
+        
+        #toastBox { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); color: #fff; padding: 20px 45px; border-radius: 50px; z-index: 10000; display: flex; align-items: center; gap: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); transition: 0.5s; font-weight: 600; }
         #toastBox.active { bottom: 40px; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 11000; opacity: 0; transition: 0.3s; }
         .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-content { background: white; padding: 45px; border-radius: 28px; max-width: 450px; width: 90%; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.2); transform: scale(0.9); transition: 0.3s; }
-        .modal-overlay.active .modal-content { transform: scale(1); }
+        .modal-content { background: white; padding: 45px; border-radius: 28px; max-width: 450px; width: 90%; text-align: center; transform: scale(0.9); transition: 0.3s; }
+        body { cursor: url('https://cur.cursors-4u.net/games/gam-4/gam372.cur'), auto !important; }
     </style>
 
     <script>
@@ -95,13 +95,11 @@
                     <Columns>
                         <asp:TemplateField HeaderText="Sách đánh giá">
                             <ItemTemplate>
-                                <a href='<%# "../khach/chitiet.aspx?MaSach=" + Eval("MaSach") %>' target="_blank" class="book-link">
-                                    <%# Eval("TenSach") %>
-                                </a>
+                                <div class="book-link-title"><%# Eval("TenSach") %></div>
+                                <div style="font-size:11px; color:#94a3b8; margin-top:4px;">Mã sách: #<%# Eval("MaSach") %></div>
                             </ItemTemplate>
                         </asp:TemplateField>
 
-                        <%-- FIX LỖI CẤU TRÚC THẺ DIV TẠI ĐÂY [cite: 2026-03-13] --%>
                         <asp:TemplateField HeaderText="Người gửi">
                             <ItemTemplate>
                                 <div class="admin-user-info">
@@ -115,23 +113,32 @@
                             </ItemTemplate>
                         </asp:TemplateField>
 
-                        <asp:TemplateField HeaderText="Điểm đánh giá">
+                        <asp:TemplateField HeaderText="Đánh giá">
                             <ItemTemplate>
                                 <div class="star-rating"><%# RenderStars(Eval("DanhGia")) %></div>
-                                <div style="font-size:11px; font-weight:900; color:#94a3b8; margin-top:5px; text-transform:uppercase;">Rating: <%# Eval("DanhGia") %>/5</div>
+                                <div style="font-size:10px; font-weight:900; color:#cbd5e1; margin-top:3px;">RATING: <%# Eval("DanhGia") %>/5</div>
                             </ItemTemplate>
                         </asp:TemplateField>
 
-                        <asp:TemplateField HeaderText="Nội dung phản hồi">
+                        <asp:TemplateField HeaderText="Nội dung">
                             <ItemTemplate>
                                 <div class="comment-text">"<%# Eval("NoiDung") %>"</div>
                             </ItemTemplate>
                         </asp:TemplateField>
 
-                        <asp:TemplateField HeaderText="Thao tác">
+                        <%-- MỚI: CỘT CHI TIẾT TRANG KHÁCH [cite: 2026-03-14] --%>
+                        <asp:TemplateField HeaderText="Xem trang">
+                            <ItemTemplate>
+                                <a href='<%# "../khach/chitiet.aspx?MaSach=" + Eval("MaSach") %>' target="_blank" class="btn-view-detail">
+                                    <i class="fa-solid fa-up-right-from-square"></i> CHI TIẾT
+                                </a>
+                            </ItemTemplate>
+                        </asp:TemplateField>
+
+                        <asp:TemplateField HeaderText="Hành động">
                             <ItemTemplate>
                                 <button type="button" class="btn-delete-action" onclick='<%# "openDeleteModal(" + Eval("MaBL") + ")" %>'>
-                                    <i class="fa-solid fa-trash-can"></i> XÓA BỎ
+                                    <i class="fa-solid fa-trash-can"></i> XÓA
                                 </button>
                             </ItemTemplate>
                         </asp:TemplateField>
@@ -144,7 +151,7 @@
                     </EmptyDataTemplate>
                 </asp:GridView>
 
-                <%-- PHÂN TRANG SLIDING WINDOW --%>
+                <%-- PHÂN TRANG --%>
                 <div class="pagination-wrapper">
                     <asp:HyperLink ID="lnkFirst" runat="server" CssClass="page-nav"><i class="fa-solid fa-angles-left"></i></asp:HyperLink>
                     <asp:HyperLink ID="lnkPrev" runat="server" CssClass="page-nav"><i class="fa-solid fa-chevron-left"></i></asp:HyperLink>

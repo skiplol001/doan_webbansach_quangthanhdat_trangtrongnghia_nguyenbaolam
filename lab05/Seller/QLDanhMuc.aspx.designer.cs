@@ -7,137 +7,119 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace lab05
+namespace lab05.Seller
 {
 
 
-    public partial class chitiet
+    public partial class QLDanhMuc
     {
 
         /// <summary>
-        /// btnConfirmDelete control.
+        /// hfActiveTab control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnConfirmDelete;
+        protected global::System.Web.UI.WebControls.HiddenField hfActiveTab;
 
         /// <summary>
-        /// hfDeleteID control.
+        /// gvChuDe control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField hfDeleteID;
+        protected global::System.Web.UI.WebControls.GridView gvChuDe;
 
         /// <summary>
-        /// FormViewChiTiet control.
+        /// gvNXB control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.FormView FormViewChiTiet;
+        protected global::System.Web.UI.WebControls.GridView gvNXB;
 
         /// <summary>
-        /// pnlNoRelated control.
+        /// hfMaCD control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlNoRelated;
+        protected global::System.Web.UI.WebControls.HiddenField hfMaCD;
 
         /// <summary>
-        /// rptRelated control.
+        /// txtTenCD control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptRelated;
+        protected global::System.Web.UI.WebControls.TextBox txtTenCD;
 
         /// <summary>
-        /// pnlCommentForm control.
+        /// ddlPhanLoai control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlCommentForm;
+        protected global::System.Web.UI.WebControls.DropDownList ddlPhanLoai;
 
         /// <summary>
-        /// ddlStars control.
+        /// btnSaveCD control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlStars;
+        protected global::System.Web.UI.WebControls.Button btnSaveCD;
 
         /// <summary>
-        /// txtNoiDungBL control.
+        /// hfMaNXB control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtNoiDungBL;
+        protected global::System.Web.UI.WebControls.HiddenField hfMaNXB;
 
         /// <summary>
-        /// btnGuiBL control.
+        /// txtTenNXB control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnGuiBL;
+        protected global::System.Web.UI.WebControls.TextBox txtTenNXB;
 
         /// <summary>
-        /// pnlLoginReq control.
+        /// txtDiaChiNXB control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlLoginReq;
+        protected global::System.Web.UI.WebControls.TextBox txtDiaChiNXB;
 
         /// <summary>
-        /// upComments control.
+        /// txtSDTNXB control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.UpdatePanel upComments;
+        protected global::System.Web.UI.WebControls.TextBox txtSDTNXB;
 
         /// <summary>
-        /// rptComments control.
+        /// btnSaveNXB control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptComments;
-
-        /// <summary>
-        /// SqlDataSourceChiTiet control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.SqlDataSource SqlDataSourceChiTiet;
-
-        /// <summary>
-        /// SqlDataSourceComments control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.SqlDataSource SqlDataSourceComments;
+        protected global::System.Web.UI.WebControls.Button btnSaveNXB;
     }
 }

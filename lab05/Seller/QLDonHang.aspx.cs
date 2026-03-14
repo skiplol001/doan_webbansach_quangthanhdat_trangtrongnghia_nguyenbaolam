@@ -5,17 +5,19 @@ using System.Data.SqlClient;
 using System.Configuration;
 using System.Web;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 
 namespace lab05.Seller
 {
     public partial class QLDonHang : System.Web.UI.Page
     {
+        // Chuỗi kết nối lấy từ Web.config
         string strCon = ConfigurationManager.ConnectionStrings["BookStoreDB"].ConnectionString;
-        int pageSize = 10; // Giới hạn 10 đơn hàng mỗi trang
+        int pageSize = 10; // Số lượng đơn hàng hiển thị trên một trang
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Kiểm tra bảo mật
+            // 1. Kiểm tra quyền truy cập (Chỉ cho phép Seller - MaRole = 2)
             if (Session["MaRole"] == null || Convert.ToInt32(Session["MaRole"]) != 2)
             {
                 Response.Redirect("~/khach/dangnhap.aspx");
@@ -28,13 +30,13 @@ namespace lab05.Seller
             }
         }
 
+        // --- HÀM TẢI DỮ LIỆU ĐƠN HÀNG KÈM PHÂN TRANG ---
         private void LoadOrderData()
         {
-            // 1. Xác định trang hiện tại [cite: 2026-03-11]
             int currentPage = 1;
             if (Request.QueryString["page"] != null) int.TryParse(Request.QueryString["page"], out currentPage);
 
-            // Lấy từ khóa tìm kiếm (nếu có)
+            // Xử lý từ khóa tìm kiếm
             string keyword = txtSearch.Text.Trim();
             if (string.IsNullOrEmpty(keyword) && Request.QueryString["search"] != null)
             {
@@ -44,7 +46,7 @@ namespace lab05.Seller
 
             using (SqlConnection conn = new SqlConnection(strCon))
             {
-                // 2. Tính tổng số đơn hàng để phân trang
+                // Đếm tổng số đơn hàng để tính toán bộ phân trang
                 string countSql = @"SELECT COUNT(*) FROM DonDatHang D 
                                     JOIN KhachHang K ON D.MaKH = K.MaKH 
                                     WHERE D.SoDH LIKE @key OR K.HoTenKH LIKE @key";
@@ -57,11 +59,11 @@ namespace lab05.Seller
                 int totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
                 conn.Close();
 
-                // 3. Truy vấn dữ liệu theo cơ chế OFFSET FETCH (Phân trang SQL chuẩn) [cite: 2026-03-11]
+                // Truy vấn dữ liệu phân trang bằng OFFSET FETCH (SQL Server 2012+)
                 string dataSql = @"SELECT D.SoDH, K.HoTenKH, D.NgayDH, ISNULL(D.Trigia, 0) as Trigia, D.Dagiao 
                                    FROM DonDatHang D JOIN KhachHang K ON D.MaKH = K.MaKH 
                                    WHERE D.SoDH LIKE @key OR K.HoTenKH LIKE @key 
-                                   ORDER BY D.NgayDH DESC 
+                                   ORDER BY D.Dagiao ASC, D.NgayDH DESC 
                                    OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY";
 
                 SqlDataAdapter da = new SqlDataAdapter(dataSql, conn);
@@ -75,22 +77,81 @@ namespace lab05.Seller
                 gvOrders.DataSource = dt;
                 gvOrders.DataBind();
 
-                // 4. Cấu hình bộ phân trang trượt 5 nút
+                // Cập nhật giao diện phân trang trượt
                 CreateSlidingPaging(currentPage, totalPages);
             }
         }
 
-        // --- HÀM FIX LỖI CS1061: ĐỊNH NGHĨA SỰ KIỆN TÌM KIẾM [cite: 2026-03-11] ---
+        // --- HÀM QUAN TRỌNG: GIẢI QUYẾT LỖI CS1061 & XỬ LÝ TRỪ KHO ---
+        protected void gvOrders_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            // Kiểm tra xem lệnh có phải là ConfirmDelivery (đã định nghĩa trong .aspx) không
+            if (e.CommandName == "ConfirmDelivery")
+            {
+                int soDH = Convert.ToInt32(e.CommandArgument);
+
+                using (SqlConnection conn = new SqlConnection(strCon))
+                {
+                    conn.Open();
+                    // Bắt đầu một Transaction để đảm bảo: Nếu trừ kho lỗi thì đơn hàng không được đổi trạng thái
+                    SqlTransaction trans = conn.BeginTransaction();
+
+                    try
+                    {
+                        // Bước 1: Cập nhật trạng thái đơn hàng thành Đã giao
+                        string sqlUpdateOrder = "UPDATE DonDatHang SET Dagiao = 1, Ngaygiao = GETDATE() WHERE SoDH = @soDH";
+                        SqlCommand cmdUpdateOrder = new SqlCommand(sqlUpdateOrder, conn, trans);
+                        cmdUpdateOrder.Parameters.AddWithValue("@soDH", soDH);
+                        cmdUpdateOrder.ExecuteNonQuery();
+
+                        // Bước 2: Lấy danh sách sản phẩm và số lượng trong đơn hàng này để trừ kho
+                        string sqlGetItems = "SELECT MaSach, Soluong FROM CTDatHang WHERE SoDH = @soDH";
+                        SqlCommand cmdGetItems = new SqlCommand(sqlGetItems, conn, trans);
+                        cmdGetItems.Parameters.AddWithValue("@soDH", soDH);
+
+                        SqlDataAdapter da = new SqlDataAdapter(cmdGetItems);
+                        DataTable dtItems = new DataTable();
+                        da.Fill(dtItems);
+
+                        // Bước 3: Duyệt qua từng sản phẩm để thực hiện trừ số lượng tồn kho
+                        foreach (DataRow row in dtItems.Rows)
+                        {
+                            int maSach = Convert.ToInt32(row["MaSach"]);
+                            int slMua = Convert.ToInt32(row["Soluong"]);
+
+                            string sqlUpdateStock = "UPDATE Sach SET Soluongton = Soluongton - @sl WHERE MaSach = @ms";
+                            SqlCommand cmdUpdateStock = new SqlCommand(sqlUpdateStock, conn, trans);
+                            cmdUpdateStock.Parameters.AddWithValue("@sl", slMua);
+                            cmdUpdateStock.Parameters.AddWithValue("@ms", maSach);
+                            cmdUpdateStock.ExecuteNonQuery();
+                        }
+
+                        // Nếu mọi thứ thành công, xác nhận các thay đổi vào Database
+                        trans.Commit();
+                        ScriptManager.RegisterStartupScript(this, GetType(), "alert", "alert('Giao hàng thành công! Số lượng sách trong kho đã tự động cập nhật.');", true);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Nếu có bất kỳ lỗi nào xảy ra, hoàn tác (Rollback) toàn bộ quá trình
+                        trans.Rollback();
+                        ScriptManager.RegisterStartupScript(this, GetType(), "alert", $"alert('Lỗi khi xử lý đơn hàng: {ex.Message}');", true);
+                    }
+                    finally { conn.Close(); }
+                }
+                // Nạp lại danh sách đơn hàng để cập nhật giao diện
+                LoadOrderData();
+            }
+        }
+
         protected void btnSearch_Click(object sender, EventArgs e)
         {
-            // Reset về trang 1 và nạp lại dữ liệu dựa trên từ khóa mới
+            // Khi tìm kiếm, quay lại trang 1
             Response.Redirect(GetPageUrl(1));
         }
 
-        // --- LOGIC PHÂN TRANG SLIDING WINDOW CHUẨN ---
         private void CreateSlidingPaging(int current, int total)
         {
-            if (total <= 1) { lnkFirst.Visible = lnkLast.Visible = lnkPrev.Visible = lnkNext.Visible = rptPaging.Visible = false; return; }
+            if (total <= 1) { rptPaging.Visible = lnkFirst.Visible = lnkLast.Visible = lnkPrev.Visible = lnkNext.Visible = false; return; }
             rptPaging.Visible = true;
 
             lnkFirst.NavigateUrl = GetPageUrl(1);
@@ -98,7 +159,6 @@ namespace lab05.Seller
             lnkPrev.NavigateUrl = GetPageUrl(current > 1 ? current - 1 : 1);
             lnkNext.NavigateUrl = GetPageUrl(current < total ? current + 1 : total);
 
-            // Thuật toán: startPage và endPage để nút đang chọn luôn ở giữa dải 5 nút [cite: 2026-03-11]
             int startPage = Math.Max(1, current - 2);
             int endPage = Math.Min(total, startPage + 4);
             if (endPage - startPage < 4) startPage = Math.Max(1, endPage - 4);
@@ -113,7 +173,6 @@ namespace lab05.Seller
             rptPaging.DataBind();
         }
 
-        // Tạo URL thông minh giữ lại tham số tìm kiếm khi chuyển trang [cite: 2026-03-11]
         public string GetPageUrl(object pageNum)
         {
             string searchParam = !string.IsNullOrEmpty(txtSearch.Text) ? "&search=" + Server.UrlEncode(txtSearch.Text) : "";

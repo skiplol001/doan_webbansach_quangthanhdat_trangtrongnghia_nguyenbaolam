@@ -47,10 +47,13 @@
 
         .nav-item i { width: 20px; font-size: 1.1rem; text-align: center; }
         .nav-item:hover { background: rgba(99, 102, 241, 0.1); color: white; }
+        
+        /* Cải thiện hiển thị Active Link */
         .nav-item.active-link { 
             background: var(--seller-primary); color: white; 
             box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
         }
+        .nav-item.active-link i { color: white; }
 
         .nav-divider { height: 1px; background: rgba(255,255,255,0.05); margin: 15px 25px; }
 
@@ -84,12 +87,15 @@
         .content-padding { padding: 40px; flex-grow: 1; }
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Scrollbar Sidebar */
+        .nav-menu::-webkit-scrollbar { width: 5px; }
+        .nav-menu::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
     <asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>
 </head>
 <body>
     <form id="form1" runat="server">
-        <%-- FIX: ScriptManager bắt buộc phải có để trang con không bị lỗi AJAX --%>
         <asp:ScriptManager ID="smSeller" runat="server" />
 
         <div class="sidebar">
@@ -105,6 +111,11 @@
                 <a href="QLSach.aspx" class="nav-item">
                     <i class="fa-solid fa-book-open"></i> Quản lý Sách
                 </a>
+
+                <%-- MỚI: QUẢN LÝ DANH MỤC & NXB --%>
+                <a href="QLDanhMuc.aspx" class="nav-item">
+                    <i class="fa-solid fa-layer-group"></i> Quản lý Danh mục
+                </a>
                 
                 <a href="QLDonHang.aspx" class="nav-item">
                     <i class="fa-solid fa-truck-fast"></i> Quản lý Đơn hàng
@@ -116,13 +127,15 @@
                     <i class="fa-solid fa-comment-dots"></i> Quản lý Đánh giá
                 </a>
 
-                <a href="HoSoSeller.aspx" class="nav-item">
-                    <i class="fa-solid fa-user-gear"></i> Hồ sơ người bán
+                <a href="QLTaiKhoan.aspx" class="nav-item">
+                    <i class="fa-solid fa-user-shield"></i> Quản trị Thành viên
                 </a>
-                 <a href="QLTaiKhoan.aspx" class="nav-item">
-                    <i class="fa-solid fa-user"></i> Quản lý tài khoản
-                </a>
+
                 <div class="nav-divider"></div>
+
+                <a href="HoSoSeller.aspx" class="nav-item">
+                    <i class="fa-solid fa-user-gear"></i> Cấu hình cửa hàng
+                </a>
 
                 <a href="../khach/trangchu.aspx" class="nav-item">
                     <i class="fa-solid fa-house-user"></i> Xem trang khách
@@ -136,13 +149,13 @@
                 <div class="user-info">
                     <div class="user-avatar"><i class="fa-solid fa-user-tie"></i></div>
                     <div>
-                        <span style="display:block; font-size:11px; color:#94a3b8; text-transform:uppercase;">Xin chào</span>
-                        <asp:Literal ID="litSellerName" runat="server" Text="Người bán"></asp:Literal>
+                        <span style="display:block; font-size:11px; color:#94a3b8; text-transform:uppercase; font-weight:800;">Trạng thái: Seller</span>
+                        <asp:Literal ID="litSellerName" runat="server" Text="Quản trị viên"></asp:Literal>
                     </div>
                 </div>
 
                 <asp:LinkButton ID="btnLogout" runat="server" CssClass="btn-logout" OnClick="btnLogout_Click" CausesValidation="false">
-                    <i class="fa-solid fa-power-off"></i> ĐĂNG XUẤT
+                    <i class="fa-solid fa-power-off"></i> ĐĂNG XUẤT HỆ THỐNG
                 </asp:LinkButton>
             </div>
 
@@ -153,11 +166,12 @@
     </form>
 
     <script>
-        // Logic tự động kích hoạt class active cho menu dựa trên URL
+        // Logic tự động kích hoạt class active cho menu
         document.addEventListener('DOMContentLoaded', function () {
-            const currentPath = window.location.pathname.toLowerCase();
+            const currentPath = window.location.pathname.split('/').pop().toLowerCase();
             document.querySelectorAll('.nav-item').forEach(link => {
-                if (link.href.toLowerCase().includes(currentPath)) {
+                const linkPath = link.getAttribute('href').toLowerCase();
+                if (currentPath === linkPath || (currentPath === "" && linkPath === "dashboard.aspx")) {
                     link.classList.add('active-link');
                 } else {
                     link.classList.remove('active-link');

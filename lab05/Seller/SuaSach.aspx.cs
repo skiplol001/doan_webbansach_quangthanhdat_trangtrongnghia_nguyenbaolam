@@ -68,6 +68,10 @@ namespace lab05.Seller
                 {
                     txtTenSach.Text = dr["TenSach"].ToString();
                     txtGia.Text = string.Format("{0:0}", dr["Dongia"]);
+
+                    // NẠP SỐ LƯỢNG TỒN KHO [cite: 2026-03-14]
+                    txtSoLuong.Text = dr["Soluongton"].ToString();
+
                     txtMoTa.Text = dr["Mota"].ToString();
                     ddlChuDe.SelectedValue = dr["MaCD"].ToString();
                     ddlNXB.SelectedValue = dr["MaNXB"].ToString();
@@ -75,7 +79,6 @@ namespace lab05.Seller
                     // Hiển thị ảnh hiện tại
                     string currentImg = dr["AnhBia"].ToString();
                     imgHienTai.ImageUrl = "~/Images/" + currentImg;
-                    // Lưu lại tên ảnh cũ vào ViewState để sử dụng nếu không đổi ảnh mới [cite: 2026-03-11]
                     ViewState["OldImg"] = currentImg;
                 }
             }
@@ -84,21 +87,16 @@ namespace lab05.Seller
         protected void btnCapNhat_Click(object sender, EventArgs e)
         {
             int maSach = Convert.ToInt32(Request.QueryString["id"]);
-
-            // 1. Xác định tên file ảnh: Cũ hay Mới? [cite: 2026-03-11]
             string finalFileName = ViewState["OldImg"].ToString();
 
             if (fuAnh.HasFile)
             {
-                // Nếu đổi ảnh, áp dụng quy tắc đặt tên: images-[id].[extension]
                 string extension = Path.GetExtension(fuAnh.FileName);
                 finalFileName = "images-" + maSach + extension;
-
-                // Lưu vào server
                 fuAnh.SaveAs(Server.MapPath("~/Images/") + finalFileName);
             }
 
-            // 2. Thực hiện cập nhật Database
+            // 2. Thực hiện cập nhật Database (Bao gồm Soluongton) [cite: 2026-03-14]
             using (SqlConnection conn = new SqlConnection(strCon))
             {
                 string sql = @"UPDATE Sach SET 
@@ -106,6 +104,7 @@ namespace lab05.Seller
                                 MaCD = @macd, 
                                 MaNXB = @manxb, 
                                 Dongia = @gia, 
+                                Soluongton = @sl, 
                                 Mota = @mota, 
                                 AnhBia = @anh, 
                                 Ngaycapnhat = GETDATE() 
@@ -116,8 +115,12 @@ namespace lab05.Seller
                 cmd.Parameters.AddWithValue("@macd", ddlChuDe.SelectedValue);
                 cmd.Parameters.AddWithValue("@manxb", ddlNXB.SelectedValue);
                 cmd.Parameters.AddWithValue("@gia", decimal.Parse(txtGia.Text));
+
+                // GÁN GIÁ TRỊ SỐ LƯỢNG MỚI
+                cmd.Parameters.AddWithValue("@sl", int.Parse(txtSoLuong.Text));
+
                 cmd.Parameters.AddWithValue("@mota", txtMoTa.Text.Trim());
-                cmd.Parameters.AddWithValue("@anh", finalFileName); // Tên file đã được xử lý [cite: 2026-03-11]
+                cmd.Parameters.AddWithValue("@anh", finalFileName);
                 cmd.Parameters.AddWithValue("@id", maSach);
 
                 try
@@ -128,7 +131,7 @@ namespace lab05.Seller
                 }
                 catch (Exception ex)
                 {
-                    ScriptManager.RegisterStartupScript(this, GetType(), "err", $"alert('Lỗi: {ex.Message}');", true);
+                    ScriptManager.RegisterStartupScript(this, GetType(), "err", $"alert('Lỗi cập nhật: {ex.Message}');", true);
                 }
             }
         }
